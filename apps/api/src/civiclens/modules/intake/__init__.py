@@ -1,0 +1,1 @@
+"""Citizen report intake module."""

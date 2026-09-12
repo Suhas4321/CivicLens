@@ -1,0 +1,17 @@
+{
+  "name": "civiclens",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "web:dev": "npm run dev --workspace @civiclens/web",
+    "web:build": "npm run build --workspace @civiclens/web",
+    "web:typecheck": "npm run typecheck --workspace @civiclens/web"
+  }
+}
+

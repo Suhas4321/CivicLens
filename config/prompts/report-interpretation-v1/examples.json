@@ -1,0 +1,21 @@
+[
+  {
+    "input": "Synthetic hospital report: tap water smells like chemicals and patients felt sick.",
+    "output": {
+      "detected_language": "en",
+      "category": "water_quality",
+      "subtype": "suspected_contamination",
+      "summary": "Reporter states that hospital tap water smelled chemical and illness followed drinking it.",
+      "time_assertion": null,
+      "place_assertion": "hospital",
+      "service_assertion": "tap water smelled chemical",
+      "safety_signal_candidates": [{
+        "code": "POSSIBLE_WATER_CONTAMINATION",
+        "confidence": "supported",
+        "contexts": ["hospital"],
+        "reason": "Reporter links unusual tap-water smell with illness in a hospital context."
+      }],
+      "uncertainties": ["Contamination is not verified", "Cause is unknown"]
+    }
+  }
+]

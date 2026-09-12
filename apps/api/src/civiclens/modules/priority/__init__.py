@@ -1,0 +1,1 @@
+"""Transparent deterministic priority assessment."""

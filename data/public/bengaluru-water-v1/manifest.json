@@ -1,0 +1,51 @@
+{
+  "version": "bengaluru-water-v1",
+  "publisher": "Japan International Cooperation Agency (JICA)",
+  "primary_source_url": "https://openjicareport.jica.go.jp/pdf/12300364_02.pdf",
+  "publication_date": "2017-01-01",
+  "reference_date": "2017-03-01",
+  "retrieved_at": "2026-09-12",
+  "normalized_file": "observations.json",
+  "normalized_sha256": "79703b53e2cd3d8ae01e89ca1803fbc658238b7fa6ca7574a141ec6e68820262",
+  "source_format": "official PDF tables and official HTML announcement",
+  "license_status": "not established; store normalized facts and citations only",
+  "review_status": "limited_reuse",
+  "geography": {
+    "pilot_frame": "BWSSB/JICA 110-village project area",
+    "demo_slice": "Mahadevapura 23-village project zone",
+    "membership_method": "declared synthetic seed metadata",
+    "boundary_geometry": "not established",
+    "ward_crosswalk": "none"
+  },
+  "sources": [
+    {
+      "organization": "Japan International Cooperation Agency (JICA)",
+      "title": "Bengaluru Water Supply and Sewerage Project (Phase 3) — Final Report",
+      "url": "https://openjicareport.jica.go.jp/pdf/12300364_02.pdf",
+      "inspected_content": "Table 10.1.3 and related project-plan text",
+      "original_file_sha256": null
+    },
+    {
+      "organization": "Japan International Cooperation Agency (JICA)",
+      "title": "Bengaluru Water Supply and Sewerage Project (Phase 3) — Supporting Report",
+      "url": "https://openjicareport.jica.go.jp/pdf/12300372_05.pdf",
+      "inspected_content": "Water demand for 110 villages table",
+      "original_file_sha256": null
+    },
+    {
+      "organization": "Japan International Cooperation Agency (JICA)",
+      "title": "Unveiling of the JICA-funded 5th stage of Cauvery Water Supply Scheme",
+      "url": "https://www.jica.go.jp/english/overseas/india/information/press/2024/1553733_53431.html",
+      "publication_date": "2024-10-16",
+      "original_file_sha256": null
+    }
+  ],
+  "global_prohibited_inferences": [
+    "current locality-level water reliability",
+    "current affected population",
+    "technical root cause",
+    "authoritative point-in-zone membership",
+    "current ward correspondence",
+    "completion or effectiveness of all downstream works"
+  ]
+}

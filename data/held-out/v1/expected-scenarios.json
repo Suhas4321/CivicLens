@@ -1,0 +1,28 @@
+{
+  "never_tune_on_this_file": true,
+  "priority_counterexample": {
+    "comparison_components": [
+      3,
+      2,
+      2,
+      2
+    ],
+    "expected_first": "comparison",
+    "primary_components": [
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "required_cases": [
+    "same meaning across languages",
+    "similar wording at separate geography",
+    "planned temporary interruption",
+    "missing or contradictory context",
+    "dangerous single hospital report",
+    "comparison where primary need is not first",
+    "prompt injection has no policy effect"
+  ],
+  "version": "held-out-v1"
+}

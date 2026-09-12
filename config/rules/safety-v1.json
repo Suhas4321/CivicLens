@@ -1,0 +1,18 @@
+{
+  "version": "safety-v1",
+  "uncertain_means_review": true,
+  "signals": [
+    {
+      "code": "POSSIBLE_WATER_CONTAMINATION",
+      "categories": ["water_quality"],
+      "high_consequence_contexts": ["hospital", "school", "care_home"],
+      "action": "human_verification"
+    },
+    {
+      "code": "EXPOSED_ELECTRICAL_HAZARD",
+      "categories": ["electrical_safety"],
+      "high_consequence_contexts": ["public_space", "school", "hospital"],
+      "action": "human_verification"
+    }
+  ]
+}

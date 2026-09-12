@@ -1,0 +1,1800 @@
+{
+  "components": {
+    "schemas": {
+      "Body_submit_report_api_v1_reports_post": {
+        "properties": {
+          "consent": {
+            "const": true,
+            "title": "Consent",
+            "type": "boolean"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 20,
+            "title": "Description",
+            "type": "string"
+          },
+          "language_hint": {
+            "enum": [
+              "en",
+              "kn",
+              "hi",
+              "mixed"
+            ],
+            "title": "Language Hint",
+            "type": "string"
+          },
+          "locality_label": {
+            "maxLength": 160,
+            "minLength": 3,
+            "title": "Locality Label",
+            "type": "string"
+          },
+          "synthetic_demo_confirmation": {
+            "const": true,
+            "title": "Synthetic Demo Confirmation",
+            "type": "boolean"
+          },
+          "voice": {
+            "anyOf": [
+              {
+                "contentMediaType": "application/octet-stream",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voice"
+          }
+        },
+        "required": [
+          "description",
+          "language_hint",
+          "locality_label",
+          "consent",
+          "synthetic_demo_confirmation"
+        ],
+        "title": "Body_submit_report_api_v1_reports_post",
+        "type": "object"
+      },
+      "CandidatePrerequisite": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "unknown",
+              "required",
+              "satisfied",
+              "not_applicable"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "state"
+        ],
+        "title": "CandidatePrerequisite",
+        "type": "object"
+      },
+      "DecisionCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "disposition": {
+            "enum": [
+              "refer",
+              "defer",
+              "reject"
+            ],
+            "title": "Disposition",
+            "type": "string"
+          },
+          "expected_entity_version": {
+            "minimum": 1.0,
+            "title": "Expected Entity Version",
+            "type": "integer"
+          },
+          "next_review_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Review Date"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step"
+          },
+          "reason_code": {
+            "enum": [
+              "FIELD_VERIFICATION",
+              "FEASIBILITY_REVIEW",
+              "EVIDENCE_GAP",
+              "WORKS_OVERLAP_REVIEW",
+              "NOT_SUPPORTED"
+            ],
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "reason_text": {
+            "anyOf": [
+              {
+                "maxLength": 600,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Text"
+          }
+        },
+        "required": [
+          "disposition",
+          "reason_code",
+          "expected_entity_version"
+        ],
+        "title": "DecisionCreateRequest",
+        "type": "object"
+      },
+      "DemoSessionCreated": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "actor_role": {
+            "const": "demo_officer",
+            "default": "demo_officer",
+            "title": "Actor Role",
+            "type": "string"
+          },
+          "disclosure": {
+            "default": "This isolated session may change only synthetic demo overlays; seed evidence is immutable.",
+            "title": "Disclosure",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "access_token",
+          "expires_at"
+        ],
+        "title": "DemoSessionCreated",
+        "type": "object"
+      },
+      "EvidenceItem": {
+        "additionalProperties": false,
+        "properties": {
+          "classification": {
+            "enum": [
+              "real_public",
+              "derived_public",
+              "synthetic_demo"
+            ],
+            "title": "Classification",
+            "type": "string"
+          },
+          "contributes_to_rating": {
+            "title": "Contributes To Rating",
+            "type": "boolean"
+          },
+          "geography": {
+            "title": "Geography",
+            "type": "string"
+          },
+          "geography_kind": {
+            "title": "Geography Kind",
+            "type": "string"
+          },
+          "geography_vintage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geography Vintage"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "prohibited_inferences": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Prohibited Inferences",
+            "type": "array"
+          },
+          "reference_period": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Period"
+          },
+          "role": {
+            "enum": [
+              "local_decision_evidence",
+              "broader_context"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "semantics": {
+            "title": "Semantics",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "supported_inferences": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Supported Inferences",
+            "type": "array"
+          },
+          "transformation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transformation"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "classification",
+          "kind",
+          "value",
+          "unit",
+          "geography",
+          "geography_kind",
+          "geography_vintage",
+          "reference_period",
+          "semantics",
+          "source_url",
+          "transformation",
+          "contributes_to_rating",
+          "role",
+          "supported_inferences",
+          "prohibited_inferences"
+        ],
+        "title": "EvidenceItem",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HumanDecision": {
+        "additionalProperties": false,
+        "properties": {
+          "actor_role": {
+            "const": "demo_officer",
+            "default": "demo_officer",
+            "title": "Actor Role",
+            "type": "string"
+          },
+          "candidate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Id"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "disposition": {
+            "enum": [
+              "refer",
+              "defer",
+              "reject"
+            ],
+            "title": "Disposition",
+            "type": "string"
+          },
+          "entity_version_after": {
+            "title": "Entity Version After",
+            "type": "integer"
+          },
+          "evidence_digest": {
+            "title": "Evidence Digest",
+            "type": "string"
+          },
+          "expected_entity_version": {
+            "title": "Expected Entity Version",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "need_id": {
+            "format": "uuid",
+            "title": "Need Id",
+            "type": "string"
+          },
+          "next_review_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Review Date"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step"
+          },
+          "reason_code": {
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "reason_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Text"
+          },
+          "record_notice": {
+            "default": "Append-only synthetic demo decision. It records a human disposition, not project approval.",
+            "title": "Record Notice",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "supersedes_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supersedes Id"
+          }
+        },
+        "required": [
+          "id",
+          "session_id",
+          "need_id",
+          "candidate_id",
+          "disposition",
+          "reason_code",
+          "reason_text",
+          "next_step",
+          "next_review_date",
+          "evidence_digest",
+          "expected_entity_version",
+          "entity_version_after",
+          "supersedes_id",
+          "created_at"
+        ],
+        "title": "HumanDecision",
+        "type": "object"
+      },
+      "IncidentDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "data_version": {
+            "title": "Data Version",
+            "type": "string"
+          },
+          "decision_boundary": {
+            "title": "Decision Boundary",
+            "type": "string"
+          },
+          "incident": {
+            "$ref": "#/components/schemas/IncidentSummary"
+          },
+          "relationship_explanation": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Relationship Explanation",
+            "type": "object"
+          },
+          "reports": {
+            "items": {
+              "$ref": "#/components/schemas/ReportEvidence"
+            },
+            "title": "Reports",
+            "type": "array"
+          }
+        },
+        "required": [
+          "data_version",
+          "incident",
+          "reports",
+          "relationship_explanation",
+          "decision_boundary"
+        ],
+        "title": "IncidentDetail",
+        "type": "object"
+      },
+      "IncidentSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "classification": {
+            "const": "synthetic_demo",
+            "title": "Classification",
+            "type": "string"
+          },
+          "event_start": {
+            "format": "date-time",
+            "title": "Event Start",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "locality": {
+            "title": "Locality",
+            "type": "string"
+          },
+          "relationship_state": {
+            "title": "Relationship State",
+            "type": "string"
+          },
+          "report_count": {
+            "title": "Report Count",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "category",
+          "locality",
+          "event_start",
+          "report_count",
+          "relationship_state",
+          "classification"
+        ],
+        "title": "IncidentSummary",
+        "type": "object"
+      },
+      "LaneItem": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "classification": {
+            "enum": [
+              "synthetic_demo",
+              "ai_derived"
+            ],
+            "title": "Classification",
+            "type": "string"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "locality": {
+            "title": "Locality",
+            "type": "string"
+          },
+          "report_count": {
+            "minimum": 0.0,
+            "title": "Report Count",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status",
+          "category",
+          "locality",
+          "report_count",
+          "classification",
+          "explanation"
+        ],
+        "title": "LaneItem",
+        "type": "object"
+      },
+      "LiveResponse": {
+        "properties": {
+          "status": {
+            "const": "alive",
+            "default": "alive",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "LiveResponse",
+        "type": "object"
+      },
+      "NeedSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "classification": {
+            "const": "synthetic_demo",
+            "title": "Classification",
+            "type": "string"
+          },
+          "geography": {
+            "title": "Geography",
+            "type": "string"
+          },
+          "geography_kind": {
+            "title": "Geography Kind",
+            "type": "string"
+          },
+          "geography_membership_method": {
+            "title": "Geography Membership Method",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "incident_count": {
+            "title": "Incident Count",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "lifecycle": {
+            "title": "Lifecycle",
+            "type": "string"
+          },
+          "priority_band": {
+            "title": "Priority Band",
+            "type": "string"
+          },
+          "report_count": {
+            "title": "Report Count",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "category",
+          "geography",
+          "geography_kind",
+          "geography_membership_method",
+          "lifecycle",
+          "incident_count",
+          "report_count",
+          "priority_band",
+          "classification"
+        ],
+        "title": "NeedSummary",
+        "type": "object"
+      },
+      "NeedWorkspace": {
+        "additionalProperties": false,
+        "properties": {
+          "alternative_hypotheses": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Alternative Hypotheses",
+            "type": "array"
+          },
+          "candidate": {
+            "$ref": "#/components/schemas/ProjectCandidate"
+          },
+          "data_version": {
+            "title": "Data Version",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceItem"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "evidence_notice": {
+            "title": "Evidence Notice",
+            "type": "string"
+          },
+          "human_decision_notice": {
+            "title": "Human Decision Notice",
+            "type": "string"
+          },
+          "hypothesis": {
+            "title": "Hypothesis",
+            "type": "string"
+          },
+          "hypothesis_label": {
+            "const": "Suspected Civic Need",
+            "title": "Hypothesis Label",
+            "type": "string"
+          },
+          "incidents": {
+            "items": {
+              "$ref": "#/components/schemas/IncidentSummary"
+            },
+            "title": "Incidents",
+            "type": "array"
+          },
+          "need": {
+            "$ref": "#/components/schemas/NeedSummary"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/PrioritySummary"
+          }
+        },
+        "required": [
+          "data_version",
+          "need",
+          "hypothesis",
+          "hypothesis_label",
+          "alternative_hypotheses",
+          "incidents",
+          "evidence",
+          "priority",
+          "candidate",
+          "evidence_notice",
+          "human_decision_notice"
+        ],
+        "title": "NeedWorkspace",
+        "type": "object"
+      },
+      "OfficerOverview": {
+        "additionalProperties": false,
+        "properties": {
+          "data_version": {
+            "title": "Data Version",
+            "type": "string"
+          },
+          "disclosure": {
+            "title": "Disclosure",
+            "type": "string"
+          },
+          "environment_label": {
+            "const": "Demo Officer \u2014 Synthetic Environment",
+            "title": "Environment Label",
+            "type": "string"
+          },
+          "operational_incidents": {
+            "items": {
+              "$ref": "#/components/schemas/LaneItem"
+            },
+            "title": "Operational Incidents",
+            "type": "array"
+          },
+          "planning_needs": {
+            "items": {
+              "$ref": "#/components/schemas/LaneItem"
+            },
+            "title": "Planning Needs",
+            "type": "array"
+          },
+          "safety_review": {
+            "items": {
+              "$ref": "#/components/schemas/LaneItem"
+            },
+            "title": "Safety Review",
+            "type": "array"
+          }
+        },
+        "required": [
+          "data_version",
+          "environment_label",
+          "disclosure",
+          "safety_review",
+          "operational_incidents",
+          "planning_needs"
+        ],
+        "title": "OfficerOverview",
+        "type": "object"
+      },
+      "PriorityComponent": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence Refs",
+            "type": "array"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "maximum": 3.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label",
+          "rationale",
+          "evidence_refs"
+        ],
+        "title": "PriorityComponent",
+        "type": "object"
+      },
+      "PrioritySummary": {
+        "additionalProperties": false,
+        "properties": {
+          "abstention_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Abstention Codes",
+            "type": "array"
+          },
+          "band": {
+            "enum": [
+              "high",
+              "moderate",
+              "lower",
+              "not_comparable"
+            ],
+            "title": "Band",
+            "type": "string"
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/PriorityComponent"
+            },
+            "title": "Components",
+            "type": "array"
+          },
+          "eligible": {
+            "title": "Eligible",
+            "type": "boolean"
+          },
+          "policy_notice": {
+            "title": "Policy Notice",
+            "type": "string"
+          },
+          "sensitivity_profiles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sensitivity Profiles",
+            "type": "array"
+          },
+          "sensitivity_status": {
+            "enum": [
+              "stable",
+              "sensitive",
+              "not_comparable"
+            ],
+            "title": "Sensitivity Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "eligible",
+          "band",
+          "components",
+          "sensitivity_status",
+          "sensitivity_profiles",
+          "abstention_codes",
+          "policy_notice"
+        ],
+        "title": "PrioritySummary",
+        "type": "object"
+      },
+      "ProjectCandidate": {
+        "additionalProperties": false,
+        "properties": {
+          "catalogue_key": {
+            "title": "Catalogue Key",
+            "type": "string"
+          },
+          "catalogue_version": {
+            "title": "Catalogue Version",
+            "type": "string"
+          },
+          "conditional_wording": {
+            "title": "Conditional Wording",
+            "type": "string"
+          },
+          "decision_boundary": {
+            "title": "Decision Boundary",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "lifecycle": {
+            "title": "Lifecycle",
+            "type": "string"
+          },
+          "prerequisites": {
+            "items": {
+              "$ref": "#/components/schemas/CandidatePrerequisite"
+            },
+            "title": "Prerequisites",
+            "type": "array"
+          },
+          "uncertainty": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Uncertainty",
+            "type": "array"
+          },
+          "works_overlap_evidence": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Works Overlap Evidence",
+            "type": "array"
+          },
+          "works_overlap_outcome": {
+            "title": "Works Overlap Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "catalogue_key",
+          "catalogue_version",
+          "label",
+          "conditional_wording",
+          "lifecycle",
+          "works_overlap_outcome",
+          "works_overlap_evidence",
+          "prerequisites",
+          "uncertainty",
+          "decision_boundary"
+        ],
+        "title": "ProjectCandidate",
+        "type": "object"
+      },
+      "ReadyResponse": {
+        "properties": {
+          "status": {
+            "const": "ready",
+            "default": "ready",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "ReadyResponse",
+        "type": "object"
+      },
+      "ReceiptStatus": {
+        "properties": {
+          "accepted_at": {
+            "format": "date-time",
+            "title": "Accepted At",
+            "type": "string"
+          },
+          "analysis_class": {
+            "enum": [
+              "pending",
+              "stored_sample",
+              "fresh_fixture",
+              "fresh_ai"
+            ],
+            "title": "Analysis Class",
+            "type": "string"
+          },
+          "analysis_state": {
+            "title": "Analysis State",
+            "type": "string"
+          },
+          "evidence_class": {
+            "const": "synthetic_demo",
+            "title": "Evidence Class",
+            "type": "string"
+          },
+          "generalized_area": {
+            "title": "Generalized Area",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "received",
+              "analysing",
+              "processed",
+              "needs_review"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "public_id",
+          "status",
+          "accepted_at",
+          "generalized_area",
+          "evidence_class",
+          "analysis_class",
+          "analysis_state",
+          "message"
+        ],
+        "title": "ReceiptStatus",
+        "type": "object"
+      },
+      "ReportAccepted": {
+        "properties": {
+          "accepted_at": {
+            "format": "date-time",
+            "title": "Accepted At",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          },
+          "status": {
+            "const": "received",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "public_id",
+          "status",
+          "accepted_at",
+          "message"
+        ],
+        "title": "ReportAccepted",
+        "type": "object"
+      },
+      "ReportEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_at": {
+            "format": "date-time",
+            "title": "Accepted At",
+            "type": "string"
+          },
+          "classification": {
+            "const": "synthetic_demo",
+            "title": "Classification",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "interpretation_classification": {
+            "const": "ai_derived",
+            "title": "Interpretation Classification",
+            "type": "string"
+          },
+          "interpretation_summary": {
+            "title": "Interpretation Summary",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "locality": {
+            "title": "Locality",
+            "type": "string"
+          },
+          "original_text": {
+            "title": "Original Text",
+            "type": "string"
+          },
+          "public_id": {
+            "title": "Public Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "public_id",
+          "original_text",
+          "language",
+          "accepted_at",
+          "locality",
+          "interpretation_summary",
+          "classification",
+          "interpretation_classification"
+        ],
+        "title": "ReportEvidence",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "VersionResponse": {
+        "properties": {
+          "application": {
+            "const": "civiclens-api",
+            "default": "civiclens-api",
+            "title": "Application",
+            "type": "string"
+          },
+          "catalogue_version": {
+            "title": "Catalogue Version",
+            "type": "string"
+          },
+          "environment": {
+            "title": "Environment",
+            "type": "string"
+          },
+          "prompt_version": {
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "public_snapshot_version": {
+            "title": "Public Snapshot Version",
+            "type": "string"
+          },
+          "rules_version": {
+            "title": "Rules Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "seed_version": {
+            "title": "Seed Version",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "environment",
+          "schema_version",
+          "prompt_version",
+          "rules_version",
+          "catalogue_version",
+          "seed_version",
+          "public_snapshot_version"
+        ],
+        "title": "VersionResponse",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Explainable civic needs-to-project decision intelligence.",
+    "title": "CivicLens API",
+    "version": "dev"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/demo-sessions": {
+      "post": {
+        "operationId": "create_demo_session_api_v1_demo_sessions_post",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoSessionCreated"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Create Demo Session",
+        "tags": [
+          "demo-sessions"
+        ]
+      }
+    },
+    "/api/v1/health/live": {
+      "get": {
+        "operationId": "live_api_v1_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Live",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "ready_api_v1_health_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "description": "Configuration incomplete"
+          }
+        },
+        "summary": "Ready",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/version": {
+      "get": {
+        "operationId": "version_api_v1_health_version_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Version",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/officer/incidents/{incident_id}": {
+      "get": {
+        "operationId": "incident_detail_api_v1_officer_incidents__incident_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "incident_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Incident Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Incident Detail",
+        "tags": [
+          "officer-demo"
+        ]
+      }
+    },
+    "/api/v1/officer/needs": {
+      "get": {
+        "operationId": "needs_api_v1_officer_needs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NeedSummary"
+                  },
+                  "title": "Response Needs Api V1 Officer Needs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Needs",
+        "tags": [
+          "officer-demo"
+        ]
+      }
+    },
+    "/api/v1/officer/needs/{need_id}": {
+      "get": {
+        "operationId": "need_workspace_api_v1_officer_needs__need_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "need_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Need Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeedWorkspace"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Need Workspace",
+        "tags": [
+          "officer-demo"
+        ]
+      }
+    },
+    "/api/v1/officer/needs/{need_id}/decisions": {
+      "get": {
+        "operationId": "decision_history_api_v1_officer_needs__need_id__decisions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "need_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Need Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Demo-Session-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "X-Demo-Session-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "maxLength": 256,
+              "minLength": 39,
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/HumanDecision"
+                  },
+                  "title": "Response Decision History Api V1 Officer Needs  Need Id  Decisions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decision History",
+        "tags": [
+          "human-decisions"
+        ]
+      },
+      "post": {
+        "operationId": "record_decision_api_v1_officer_needs__need_id__decisions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "need_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Need Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Demo-Session-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "X-Demo-Session-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "maxLength": 256,
+              "minLength": 39,
+              "title": "Authorization",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HumanDecision"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Decision",
+        "tags": [
+          "human-decisions"
+        ]
+      }
+    },
+    "/api/v1/officer/overview": {
+      "get": {
+        "operationId": "overview_api_v1_officer_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfficerOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Overview",
+        "tags": [
+          "officer-demo"
+        ]
+      }
+    },
+    "/api/v1/receipts/{public_id}": {
+      "get": {
+        "operationId": "receipt_status_api_v1_receipts__public_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "public_id",
+            "required": true,
+            "schema": {
+              "title": "Public Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Receipt-Capability",
+            "required": true,
+            "schema": {
+              "maxLength": 256,
+              "minLength": 32,
+              "title": "X-Receipt-Capability",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Receipt Status",
+        "tags": [
+          "report-intake"
+        ]
+      }
+    },
+    "/api/v1/reports": {
+      "post": {
+        "operationId": "submit_report_api_v1_reports_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Receipt-Capability",
+            "required": true,
+            "schema": {
+              "maxLength": 256,
+              "minLength": 32,
+              "title": "X-Receipt-Capability",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_submit_report_api_v1_reports_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Report",
+        "tags": [
+          "report-intake"
+        ]
+      }
+    }
+  }
+}

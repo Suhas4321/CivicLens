@@ -1,0 +1,1 @@
+"""Privacy-safe telemetry helpers."""

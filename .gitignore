@@ -1,0 +1,32 @@
+# JavaScript
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.pyright/
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*service-account*.json
+
+# Local runtime data
+.local-data/
+.firebase/
+firebase-debug.log
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+

@@ -1,0 +1,18 @@
+{
+  "languages": ["en", "kn", "hi", "mixed", "unknown"],
+  "categories": [
+    "water_supply",
+    "water_quality",
+    "roads",
+    "electrical_safety",
+    "waste",
+    "noise",
+    "other",
+    "unknown"
+  ],
+  "safety_signal_codes": [
+    "POSSIBLE_WATER_CONTAMINATION",
+    "EXPOSED_ELECTRICAL_HAZARD"
+  ],
+  "confidence_bands": ["supported", "uncertain"]
+}

@@ -1,0 +1,17 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --file
+      - apps/api/Dockerfile
+      - --tag
+      - ${_IMAGE}:${SHORT_SHA}
+      - .
+  - name: gcr.io/cloud-builders/docker
+    args: [push, ${_IMAGE}:${SHORT_SHA}]
+images:
+  - ${_IMAGE}:${SHORT_SHA}
+substitutions:
+  _IMAGE: asia-south1-docker.pkg.dev/${PROJECT_ID}/civiclens/api
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,0 +1,16 @@
+{
+  "version": "report-interpretation-v1",
+  "schema_version": "report-interpretation-schema-v1",
+  "provider_family": "gemini-flash",
+  "evaluation_set_version": "held-out-v1",
+  "tools_enabled": false,
+  "policy_fields_allowed": false,
+  "content_classification": "synthetic_demo_only",
+  "files_sha256": {
+    "system.md": "4258b8eab0d62f8237085dc2a605de1a52d5afb9a9eb7a844ad6c4456b6a4bd6",
+    "task.md": "18bdd04ff844f25bec4d43b69f77844e61db217af7d6d0b1b065481c5efe5a7a",
+    "response-schema.json": "351bf97b5bda3f4debd13bdaddb9345f8ca86f496a08e767418ac6a51b2de67f",
+    "controlled-vocabulary.json": "96670728bfd673741870e27bcba8e1320c42e45893bc6c995173299417c8ad22",
+    "examples.json": "e3f299f78439bc21978995bcf95d732249a303979aa6ad93611e0742ee4a2df8"
+  }
+}

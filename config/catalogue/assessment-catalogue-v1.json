@@ -1,0 +1,34 @@
+{
+  "version": "assessment-catalogue-v1",
+  "items": [
+    {
+      "key": "field_service_verification",
+      "candidate_type": "assessment",
+      "categories": ["water_supply", "water_quality", "roads", "drainage"],
+      "requires_verified_cause": false,
+      "wording": "Refer for focused field and service verification before selecting an intervention.",
+      "prerequisites": ["declared_geography", "confirmed_recurrence", "evidence_gaps_visible"]
+    },
+    {
+      "key": "operational_coordination_review",
+      "candidate_type": "operational_review",
+      "categories": ["water_supply", "roads", "drainage"],
+      "requires_verified_cause": false,
+      "wording": "Refer for operational coordination and maintenance review; verify the bounded cause and responsible function.",
+      "prerequisites": ["bounded_operational_pattern", "responsible_function_review"]
+    },
+    {
+      "key": "capital_feasibility_referral",
+      "candidate_type": "feasibility",
+      "categories": ["water_supply", "roads", "drainage"],
+      "requires_verified_cause": true,
+      "wording": "Refer for capital feasibility analysis only after verified cause, scope, existing-work overlap and alternatives are documented.",
+      "prerequisites": [
+        "verified_root_cause",
+        "verified_service_gap",
+        "existing_works_scope_checked",
+        "non_capital_alternatives_reviewed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": "grouping-v1",
+  "uncertainty_favors_separation": true,
+  "same_incident": {
+    "max_hours": 72,
+    "max_distance_km": 1.5,
+    "requires_category_match": true,
+    "project_zone_alone_is_insufficient": true
+  },
+  "recurrence": {
+    "max_days": 90,
+    "minimum_distinct_incidents": 2,
+    "requires_confirmed_links": true,
+    "requires_alternative_hypothesis_review": true
+  }
+}

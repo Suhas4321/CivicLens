@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReportInterpretationV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "detected_language",
+    "category",
+    "subtype",
+    "summary",
+    "time_assertion",
+    "place_assertion",
+    "service_assertion",
+    "safety_signal_candidates",
+    "uncertainties"
+  ],
+  "properties": {
+    "detected_language": {"enum": ["en", "kn", "hi", "mixed", "unknown"]},
+    "category": {
+      "enum": ["water_supply", "water_quality", "roads", "electrical_safety", "waste", "noise", "other", "unknown"]
+    },
+    "subtype": {"type": ["string", "null"], "maxLength": 80},
+    "summary": {"type": "string", "maxLength": 400},
+    "time_assertion": {"type": ["string", "null"], "maxLength": 160},
+    "place_assertion": {"type": ["string", "null"], "maxLength": 160},
+    "service_assertion": {"type": ["string", "null"], "maxLength": 240},
+    "safety_signal_candidates": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "confidence", "contexts", "reason"],
+        "properties": {
+          "code": {"enum": ["POSSIBLE_WATER_CONTAMINATION", "EXPOSED_ELECTRICAL_HAZARD"]},
+          "confidence": {"enum": ["supported", "uncertain"]},
+          "contexts": {"type": "array", "maxItems": 4, "items": {"type": "string"}},
+          "reason": {"type": "string", "maxLength": 240}
+        }
+      }
+    },
+    "uncertainties": {"type": "array", "maxItems": 8, "items": {"type": "string", "maxLength": 200}}
+  }
+}

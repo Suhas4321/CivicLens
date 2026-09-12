@@ -1,0 +1,16 @@
+{
+  "classification": "synthetic_demo",
+  "contains_real_citizen_data": false,
+  "ground_truth_sha256": "947053c7fdbcdb39450350fb590b0a8a4c290dba95b899fb1831e3e35fc12e88",
+  "held_out_count": 12,
+  "language_mix": {
+    "en": 21,
+    "hi": 12,
+    "kn": 24,
+    "mixed": 3
+  },
+  "report_count": 60,
+  "reports_sha256": "f666433131825eeb85a0b7b18e54b92555e0e88e848fee048d8cc750cc50a387",
+  "tuning_count": 48,
+  "version": "demo-seed-v1"
+}

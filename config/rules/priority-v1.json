@@ -1,0 +1,46 @@
+{
+  "version": "priority-v1",
+  "rating_min": 0,
+  "rating_max": 3,
+  "unknown_prevents_comparison": true,
+  "components": [
+    "scale_exposure",
+    "persistence_spread",
+    "service_disadvantage",
+    "consequence_if_unaddressed"
+  ],
+  "profiles": [
+    {
+      "key": "balanced",
+      "weights": {
+        "scale_exposure": 30,
+        "persistence_spread": 25,
+        "service_disadvantage": 25,
+        "consequence_if_unaddressed": 20
+      }
+    },
+    {
+      "key": "exposure_emphasis",
+      "weights": {
+        "scale_exposure": 45,
+        "persistence_spread": 20,
+        "service_disadvantage": 20,
+        "consequence_if_unaddressed": 15
+      }
+    },
+    {
+      "key": "persistence_emphasis",
+      "weights": {
+        "scale_exposure": 20,
+        "persistence_spread": 45,
+        "service_disadvantage": 20,
+        "consequence_if_unaddressed": 15
+      }
+    }
+  ],
+  "bands": {
+    "high_minimum": 2.25,
+    "moderate_minimum": 1.5
+  },
+  "tie_breakers": ["comparison_ready_at_ascending", "stable_need_id_ascending"]
+}

@@ -1,0 +1,324 @@
+{
+  "counterexamples": {
+    "hospital": "One report enters Safety Review regardless of volume.",
+    "planned_interruption": "One explained interruption remains operational and separate.",
+    "pothole": "18 reports remain one operational incident and do not become a planning need.",
+    "prompt_injection": "Citizen text cannot change policy, priority or decisions."
+  },
+  "incidents": [
+    {
+      "category": "water_supply",
+      "event_start": "2026-06-03T07:00:00+00:00",
+      "id": "818cf596-0ab5-5caa-a4bd-9357c19e2c17",
+      "key": "maha-water-1",
+      "lifecycle": "confirmed",
+      "locality": "Demo Locality M-A",
+      "report_ids": [
+        "34a65318-2572-50f0-ad78-52e0c4956931",
+        "784ee5ca-3b90-5606-ab4f-152c03e7fe4d",
+        "e1a098ea-6847-5102-a271-c98e5295fa52",
+        "baf5716c-b7dc-5b01-9d5e-16d025e1dd6c",
+        "b25fddbb-d2a9-5f2f-93b6-1ba99e581c5c",
+        "28f9df4f-216b-51de-b724-0c95f75ae422",
+        "54a41cd8-ad82-5b1b-923e-79986335b325",
+        "f6abb30f-0679-5262-83c8-6960ddf087d2"
+      ]
+    },
+    {
+      "category": "water_supply",
+      "event_start": "2026-06-30T07:00:00+00:00",
+      "id": "4a6b1c63-211a-5b44-bc78-6e826b20c631",
+      "key": "maha-water-2",
+      "lifecycle": "confirmed",
+      "locality": "Demo Locality M-B",
+      "report_ids": [
+        "d418b705-cd44-55c0-a3cf-9c2c35b321c0",
+        "87da0136-7a45-5c8e-b4ab-2662a4361ece",
+        "e637bdf6-f45a-5e93-900b-4c1992060238",
+        "68d997d7-299a-5881-8fa7-0a18c0dd87c3",
+        "8212426d-0bb4-5f9f-8404-b6e3773c57b0",
+        "aa81060a-e28c-5895-b1c4-49d9851ce373",
+        "68720f7f-158c-552f-92f3-e51bb282a3e9",
+        "3c3f936d-1e3e-5208-8546-9de25e340192"
+      ]
+    },
+    {
+      "category": "water_supply",
+      "event_start": "2026-07-29T07:00:00+00:00",
+      "id": "43338910-e3a6-52b9-a648-3e86282a9953",
+      "key": "maha-water-3",
+      "lifecycle": "confirmed",
+      "locality": "Demo Locality M-C",
+      "report_ids": [
+        "189cf009-ac32-507e-9724-708313f70faa",
+        "359c2477-aae5-5e9e-8c25-55af29c7e5b1",
+        "fce4bfc2-1768-52da-a54d-426f20786b38",
+        "be50f2eb-94a1-542c-87d6-e9b99b0bd928",
+        "be2e3149-3aa5-5d61-8bb6-7d9af5d59e71",
+        "f253e95e-4be8-5428-b4c1-00467012248c",
+        "1afa2698-f7a2-515e-b72b-d0d2efadebd6",
+        "0dfba06f-87ac-5532-b588-f99d403b0dd7"
+      ]
+    },
+    {
+      "category": "water_supply",
+      "event_start": "2026-06-12T08:00:00+00:00",
+      "id": "f4433e2c-f14b-5bc8-a7a2-7b512bff5ba0",
+      "key": "comparison-water-1",
+      "lifecycle": "confirmed",
+      "locality": "Demo Locality B-A",
+      "report_ids": [
+        "8b667e32-fc2e-5a60-918f-b4ae94b6d56e",
+        "c7772259-65b3-52f0-9235-cadf7ca1a1c2",
+        "70b0ae8d-3131-5f46-8fb0-ca7637cef62a",
+        "b694f0f7-e2a2-5038-8de3-05660c30aaf4",
+        "a0c2513c-a238-53e2-b144-958e7f6fb74d",
+        "4bdc0d34-42c7-556d-bf25-4bfacd40da6c"
+      ]
+    },
+    {
+      "category": "water_supply",
+      "event_start": "2026-07-18T08:00:00+00:00",
+      "id": "337ba9d7-92ce-54e1-8b78-45f9f7edbc22",
+      "key": "comparison-water-2",
+      "lifecycle": "confirmed",
+      "locality": "Demo Locality B-B",
+      "report_ids": [
+        "e9ef000f-cb37-5f6c-a62a-b07ef764b365",
+        "945ac8a6-d539-5e33-9832-c3f90e58378d",
+        "ce4a60a9-a6bd-5782-be75-d1da7d05d551",
+        "ce7d7578-2227-51b7-85eb-8698a7e54217",
+        "4a071428-4cb3-5ccb-9bec-7a66e4ccb093",
+        "427c332f-bde4-5969-99c2-d8b57f816fac"
+      ]
+    },
+    {
+      "category": "roads",
+      "event_start": "2026-07-10T09:00:00+00:00",
+      "id": "b7cdb514-c058-5932-a039-aad48f5d1d44",
+      "key": "pothole-one",
+      "lifecycle": "confirmed",
+      "locality": "Demo Junction P",
+      "report_ids": [
+        "13141383-364a-594c-b770-fd48de595894",
+        "f39f74df-190e-5c47-a980-1df2518ef0b1",
+        "93674702-ad0a-5841-887e-7d59141301c1",
+        "d025d2c7-6552-544b-bd40-0fd79265b8df",
+        "cac3b393-7c75-5f49-8f66-0b81f1861a03",
+        "a5039505-51fe-5811-9e5b-12d3862615a8",
+        "58d7ae18-575c-58d6-b074-ddcbce74879a",
+        "1dfe9f07-0b19-5adc-9466-00c0a4d08230",
+        "8478be9b-0336-55c7-9f77-4a32924dec3c",
+        "19980c50-1fd6-5b34-a1a1-c6ab3165901a",
+        "bd44b218-e182-55e5-b19d-6594f5c0b5c4",
+        "fb5bc74a-41dc-5dad-a279-052ca7e584f1",
+        "0ea1bc1a-1110-52cc-8f57-168e6c69c2f9",
+        "f88dc4c2-fe52-582b-b482-ef292b2b7a8a",
+        "ddcc0751-a22e-59c6-bac6-c43ba554cbf2",
+        "57767261-d7db-568f-a2c2-6aad4542d346",
+        "08289e07-4c20-57ca-958d-45dd3b366982",
+        "ab8cc820-f2e1-5d43-b9e3-cd86df6f9c96"
+      ]
+    },
+    {
+      "category": "water_supply",
+      "event_start": "2026-08-01T08:00:00+00:00",
+      "id": "f1bfe1ec-26a3-51ed-a953-bbc8b798aca6",
+      "key": "planned-water-one",
+      "lifecycle": "confirmed",
+      "locality": "Demo Locality M-D",
+      "report_ids": [
+        "38206a31-e931-563a-973e-8d179e35b196"
+      ]
+    },
+    {
+      "category": "water_supply",
+      "event_start": "2026-08-04T08:00:00+00:00",
+      "id": "2c970ef6-66b3-5dd5-b383-be1e3fc4ec9c",
+      "key": "remote-water-one",
+      "lifecycle": "confirmed",
+      "locality": "Remote Demo Locality R",
+      "report_ids": [
+        "c6744398-db23-5ac1-809b-0efb57d4b809"
+      ]
+    }
+  ],
+  "incidents_expected": 8,
+  "needs": [
+    {
+      "candidate": {
+        "catalogue_key": "field_service_verification",
+        "conditional_wording": "Refer for pressure, flow, leakage and continuity assessment; verify active-program scope and downstream commissioning; determine whether operational correction or capital feasibility analysis is warranted.",
+        "prerequisites": [
+          {
+            "code": "declared_geography",
+            "state": "satisfied"
+          },
+          {
+            "code": "confirmed_recurrence",
+            "state": "satisfied"
+          },
+          {
+            "code": "verified_root_cause",
+            "state": "required"
+          }
+        ],
+        "works_overlap": {
+          "evidence": [
+            "mahadevapura_glr_plan_context",
+            "stage_v_inauguration_2024"
+          ],
+          "outcome": "possible"
+        }
+      },
+      "category": "water_supply",
+      "geography_kind": "documented project grouping",
+      "geography_label": "Mahadevapura 23-village project zone",
+      "geography_membership_method": "declared synthetic seed metadata",
+      "hypothesis": "Recurring low-pressure and intermittent-supply symptoms may indicate a persistent service gap; technical cause is not yet verified.",
+      "id": "da480c3f-b3c9-5f1f-b891-6b61ed2ea11d",
+      "incident_keys": [
+        "maha-water-1",
+        "maha-water-2",
+        "maha-water-3"
+      ],
+      "key": "maha-recurring-water",
+      "lifecycle": "candidate_review",
+      "priority": {
+        "abstention_codes": [],
+        "band": "high",
+        "components": {
+          "consequence_if_unaddressed": {
+            "evidence": [
+              "water_supply_consequence_rubric"
+            ],
+            "rating": 2
+          },
+          "persistence_spread": {
+            "evidence": [
+              "maha-water-1",
+              "maha-water-2",
+              "maha-water-3"
+            ],
+            "rating": 3
+          },
+          "scale_exposure": {
+            "evidence": [
+              "synthetic_field_verification_primary_need"
+            ],
+            "rating": 2
+          },
+          "service_disadvantage": {
+            "evidence": [
+              "synthetic_field_verification_primary_need"
+            ],
+            "rating": 3
+          }
+        },
+        "eligible": true,
+        "sensitivity": {
+          "profiles": [
+            "balanced",
+            "exposure_emphasis",
+            "persistence_emphasis"
+          ],
+          "status": "stable"
+        }
+      }
+    },
+    {
+      "candidate": {
+        "catalogue_key": "field_service_verification",
+        "conditional_wording": "Request focused field verification before selecting an operational or capital response.",
+        "prerequisites": [
+          {
+            "code": "declared_geography",
+            "state": "satisfied"
+          },
+          {
+            "code": "confirmed_recurrence",
+            "state": "satisfied"
+          },
+          {
+            "code": "verified_root_cause",
+            "state": "required"
+          }
+        ],
+        "works_overlap": {
+          "evidence": [],
+          "outcome": "none"
+        }
+      },
+      "category": "water_supply",
+      "geography_kind": "documented project grouping",
+      "geography_label": "Bommanahalli 33-village project zone",
+      "geography_membership_method": "declared synthetic seed metadata",
+      "hypothesis": "Two bounded synthetic water-supply incidents may indicate recurrence, with weaker evidence than the primary story.",
+      "id": "2462e84e-2c36-51bf-8af6-bbb0bfb5ad8d",
+      "incident_keys": [
+        "comparison-water-1",
+        "comparison-water-2"
+      ],
+      "key": "comparison-recurring-water",
+      "lifecycle": "candidate_review",
+      "priority": {
+        "abstention_codes": [],
+        "band": "lower",
+        "components": {
+          "consequence_if_unaddressed": {
+            "evidence": [
+              "water_supply_consequence_rubric"
+            ],
+            "rating": 2
+          },
+          "persistence_spread": {
+            "evidence": [
+              "comparison-water-1",
+              "comparison-water-2"
+            ],
+            "rating": 2
+          },
+          "scale_exposure": {
+            "evidence": [
+              "synthetic_comparison_scope"
+            ],
+            "rating": 1
+          },
+          "service_disadvantage": {
+            "evidence": [
+              "synthetic_comparison_finding"
+            ],
+            "rating": 1
+          }
+        },
+        "eligible": true,
+        "sensitivity": {
+          "profiles": [
+            "balanced",
+            "exposure_emphasis",
+            "persistence_emphasis"
+          ],
+          "status": "stable"
+        }
+      }
+    }
+  ],
+  "recurrence_relationships": [
+    [
+      "maha-water-1",
+      "maha-water-2"
+    ],
+    [
+      "maha-water-2",
+      "maha-water-3"
+    ],
+    [
+      "comparison-water-1",
+      "comparison-water-2"
+    ]
+  ],
+  "reports_expected": 60,
+  "safety_reviews_expected": 1,
+  "suspected_needs_expected": 2,
+  "version": "demo-seed-v1"
+}
