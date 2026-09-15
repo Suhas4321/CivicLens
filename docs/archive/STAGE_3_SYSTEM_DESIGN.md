@@ -1,3 +1,11 @@
+> # ⚠️ ARCHIVED — DO NOT IMPLEMENT FROM THIS DOCUMENT
+> Superseded 15 September 2026 by `docs/REBUILD_00` … `REBUILD_05`. Kept as a historical record only.
+> **The best-engineered document in this archive. Follow its architecture; ignore its priority model.**
+> **Keep:** §2 trust boundaries, §6 AI may/may-not contract, §10 the three-relationship separation, §12 abstention codes, §16 storage, §17 security/privacy, §18 threat model, §19 failure handling, §20 observability.
+> **§17 already said "EXIF is not used for silent geolocation; the reporter confirms map location." That was right** — it is now `REBUILD_05 §1.2`.
+> **Reject:** the "Suspected Civic Need / Project Candidate" hero object, §13's four 0–3 components, §11's JICA/Mahadevapura geography.
+> See `docs/archive/README.md`.
+
 # CivicLens AI — Stage 3 System Design
 
 **Status:** Planning complete; implementation approved on 12 September 2026  

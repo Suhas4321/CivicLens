@@ -3,6 +3,9 @@ node_modules/
 dist/
 .vite/
 coverage/
+# TypeScript's incremental build cache. Machine-specific absolute paths and
+# timestamps, so it conflicts on every branch and tells a reviewer nothing.
+*.tsbuildinfo
 
 # Python
 __pycache__/
@@ -22,6 +25,10 @@ __pycache__/
 
 # Local runtime data
 .local-data/
+apps/api/civiclens_demo.db
+# OSM extracts: large, reproducible downloads. Provenance lives in osm_ingest_run,
+# not in git.
+data/osm/
 .firebase/
 firebase-debug.log
 
@@ -30,3 +37,7 @@ firebase-debug.log
 .vscode/
 .DS_Store
 
+# Local coding-agent configuration. Deliberately not shared: it records how much
+# this machine's owner trusts an agent (approval policy, sandbox mode), which is
+# a per-machine decision and not one a clone should inherit silently.
+.codex/

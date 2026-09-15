@@ -1,3 +1,9 @@
+> # ⚠️ ARCHIVED — DO NOT IMPLEMENT FROM THIS DOCUMENT
+> Superseded 15 September 2026 by `docs/REBUILD_00` … `REBUILD_05`. Kept as a historical record only.
+> **Keep:** §2 comparable-systems research, §2.3 failure evidence, §11 "mistakes to avoid", the source list.
+> **Reject:** §4.3 — the pivot from *complaint* to *need / project candidate*. That pivot is the origin of the product inversion the rebuild is undoing. Also ignore §1 and §7 hackathon framing.
+> See `docs/archive/README.md`.
+
 # CivicLens AI — Stage 1 Research & Product Discovery
 
 ## Executive conclusion
