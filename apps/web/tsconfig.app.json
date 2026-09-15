@@ -13,7 +13,8 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@config/*": ["../../config/*"]
     },
     "types": ["vite/client"],
     "resolveJsonModule": true,
@@ -22,5 +23,17 @@
     "jsx": "react-jsx",
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/App.tsx",
+    "src/index.css",
+    "src/data",
+    "src/pages",
+    "src/components/Button.tsx",
+    "src/components/Input.tsx",
+    "src/components/ProvenanceBadge.tsx",
+    "src/components/StatusPill.tsx",
+    "src/components/VoiceRecorder.tsx",
+    "src/components/index.ts"
+  ]
 }

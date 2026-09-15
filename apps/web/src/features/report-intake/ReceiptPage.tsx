@@ -1,5 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Check, Clock3, FileCheck2, LockKeyhole, MapPin } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Clock3,
+  FileCheck2,
+  ImageOff,
+  Image as ImageIcon,
+  LockKeyhole,
+  MapPin,
+} from "lucide-react";
 import { Link, useLocation, useParams } from "react-router-dom";
 
 import { ProvenanceBadge } from "@/components/civic/ProvenanceBadge";
@@ -9,12 +18,20 @@ import { Card, CardContent } from "@/components/ui/card";
 import { fetchReceipt } from "../../api/reports";
 import { ErrorState, LoadingState } from "../officer/QueryState";
 
-type ReceiptNavigationState = { capability?: string };
+type ReceiptNavigationState = {
+  capability?: string;
+  /** Whether the reporter attached a photo, and whether the server confirmed storing it. */
+  photoAttached?: boolean;
+  photoStored?: boolean;
+};
 
 export function ReceiptPage() {
   const { publicId = "" } = useParams();
   const location = useLocation();
-  const capability = (location.state as ReceiptNavigationState | null)?.capability;
+  const navigationState = location.state as ReceiptNavigationState | null;
+  const capability = navigationState?.capability;
+  const photoAttached = navigationState?.photoAttached === true;
+  const photoStored = navigationState?.photoStored === true;
   const query = useQuery({ queryKey: ["receipt", publicId], queryFn: ({ signal }) => fetchReceipt(publicId, capability ?? "", signal), enabled: Boolean(publicId && capability), retry: false });
 
   if (!capability) {
@@ -58,6 +75,40 @@ export function ReceiptPage() {
             <Clock3 className="mt-0.5 size-5 shrink-0 text-sky-700" />
             <div><p className="text-sm font-semibold text-sky-950">{receipt.analysis_state}</p><p className="mt-1 text-xs leading-5 text-sky-800">Your report may be compared with related synthetic reports before officer review.</p></div>
           </div>
+
+          {/* The photo is reported on only when the server acknowledged storing
+            * it. `POST /reports` does not accept a photo yet, so today this says
+            * plainly that the photo was not kept. Telling someone their evidence
+            * was received when it was discarded is the one thing this page must
+            * never do — and this block starts saying the opposite by itself, with
+            * no code change, the moment the endpoint acknowledges photos. */}
+          {photoAttached ? (
+            photoStored ? (
+              <div className="mt-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <ImageIcon className="mt-0.5 size-5 shrink-0 text-emerald-700" />
+                <div>
+                  <p className="text-sm font-semibold text-emerald-950">Your photo was stored</p>
+                  <p className="mt-1 text-xs leading-5 text-emerald-800">
+                    An officer can see it when reviewing this report.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <ImageOff className="mt-0.5 size-5 shrink-0 text-amber-700" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-950">
+                    Your photo could not be stored
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-amber-900">
+                    The rest of your report was received. Photo storage is not switched on in this
+                    prototype yet, so the image was not kept — we would rather tell you than let
+                    you assume it was saved.
+                  </p>
+                </div>
+              </div>
+            )
+          ) : null}
 
           <div className="mt-5 flex flex-wrap items-center gap-2"><ProvenanceBadge classification="synthetic_demo" /><ProvenanceBadge classification={receipt.analysis_class === "pending" ? "ai_derived" : "ai_derived"} /><span className="text-xs text-slate-500">Analysis: {receipt.analysis_class.replaceAll("_", " ")}</span></div>
 

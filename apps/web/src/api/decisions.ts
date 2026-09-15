@@ -32,7 +32,7 @@ const decisionSchema = z.object({
 const SESSION_KEY = "civiclens.demo-officer-session.v1";
 
 export type HumanDecision = z.infer<typeof decisionSchema>;
-type DemoSession = z.infer<typeof sessionSchema>;
+export type DemoSession = z.infer<typeof sessionSchema>;
 
 export type DecisionPayload = {
   disposition: "refer" | "defer" | "reject";
@@ -56,7 +56,7 @@ async function responseError(response: Response): Promise<never> {
   );
 }
 
-async function getSession(): Promise<DemoSession> {
+export async function getSession(): Promise<DemoSession> {
   const stored = sessionStorage.getItem(SESSION_KEY);
   if (stored) {
     try {
@@ -77,7 +77,7 @@ async function getSession(): Promise<DemoSession> {
   return created;
 }
 
-function sessionHeaders(session: DemoSession): HeadersInit {
+export function sessionHeaders(session: DemoSession): HeadersInit {
   return {
     Accept: "application/json",
     Authorization: `Bearer ${session.access_token}`,

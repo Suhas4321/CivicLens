@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+/* Product-specific tokens: page container, lane identity, surface type scales.
+ * Imported last so it can build on the shadcn theme above. */
+@import "./civic.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,7 +45,19 @@
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  /* Geist has no Kannada coverage, and Kannada is not decoration in this product
+   * — it is half the interface. Browsers fall back per glyph down this list, so
+   * Latin still renders in Geist while ಕನ್ನಡ picks the first Kannada face the
+   * device actually has. Naming them explicitly rather than trusting `system-ui`
+   * is what stops the Kannada text becoming a row of empty boxes on a machine
+   * whose default sans has no Kannada.
+   *
+   * Bundling @fontsource/noto-sans-kannada would be better than depending on
+   * what happens to be installed, and is the right fix when a dependency can be
+   * added. This costs nothing and is strictly better than tofu meanwhile. */
+  --font-sans:
+    "Geist Variable", ui-sans-serif, system-ui, "Noto Sans Kannada", "Noto Sans Kannada UI",
+    "Nirmala UI", "Kannada Sangam MN", Tunga, Kedage, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
