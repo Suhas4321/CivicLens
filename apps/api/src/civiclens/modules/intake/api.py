@@ -14,6 +14,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from pydantic import ValidationError
 
 from civiclens.bootstrap.settings import get_settings
 from civiclens.infrastructure.media.voice_storage import get_voice_storage
@@ -45,11 +46,21 @@ async def submit_report(
     service: Service,
     idempotency_key: IdempotencyKey,
     receipt_capability: ReceiptCapability,
-    description: Annotated[str, Form(min_length=20, max_length=2000)],
+    # Every field the client may send has to be declared here. FastAPI silently
+    # drops multipart fields it was not told about, so an undeclared field means
+    # the request still succeeds, the citizen is shown a receipt, and their data
+    # is thrown away with nobody told. `latitude` and `longitude` were exactly
+    # that: `ReportCreateRequest` has validated them and `SqlAlchemyIntakeRepository`
+    # has persisted them since the first migration, but the endpoint never
+    # accepted them, so every coordinate a reporter's phone produced was
+    # discarded here.
+    description: Annotated[str, Form(min_length=4, max_length=2000)],
     language_hint: Annotated[Literal["en", "kn", "hi", "mixed"], Form()],
     locality_label: Annotated[str, Form(min_length=3, max_length=160)],
     consent: Annotated[bool, Form()],
     synthetic_demo_confirmation: Annotated[bool, Form()],
+    latitude: Annotated[float | None, Form(ge=-90, le=90)] = None,
+    longitude: Annotated[float | None, Form(ge=-180, le=180)] = None,
     voice: Annotated[UploadFile | None, File()] = None,
 ) -> ReportAccepted:
     try:
@@ -61,15 +72,32 @@ async def submit_report(
                     "message": "Synthetic-data confirmation and consent are required.",
                 },
             )
-        payload = ReportCreateRequest.model_validate(
-            {
-                "description": description,
-                "language_hint": language_hint,
-                "locality_label": locality_label,
-                "consent": consent,
-                "synthetic_demo_confirmation": synthetic_demo_confirmation,
-            }
-        )
+        try:
+            payload = ReportCreateRequest.model_validate(
+                {
+                    "description": description,
+                    "language_hint": language_hint,
+                    "locality_label": locality_label,
+                    "consent": consent,
+                    "synthetic_demo_confirmation": synthetic_demo_confirmation,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                }
+            )
+        except ValidationError as exc:
+            # Model-level rules — currently only `coordinates_are_a_pair` — reach
+            # here as a plain pydantic error, which FastAPI would turn into a 500
+            # because it is raised inside the handler rather than while parsing the
+            # request. A malformed submission is the client's fault, so it gets a
+            # 422. The pydantic message is not forwarded: it embeds the offending
+            # values, and report text must never leave the process in an error.
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={
+                    "code": "REPORT_FIELDS_INVALID",
+                    "message": "Latitude and longitude must be supplied together.",
+                },
+            ) from exc
         stored_voice = None
         if voice is not None:
             voice_bytes = await voice.read(MAX_VOICE_BYTES + 1)

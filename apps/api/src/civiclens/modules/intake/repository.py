@@ -36,7 +36,26 @@ class IntakeRecord:
     original_text: str
     language_hint: str
     processing_state: str
+    # Where the reporter said the problem is. Optional because a reporter may
+    # decline location, or be indoors with no fix, and a report without
+    # coordinates is still a report -- `locality_label` carries it then.
+    #
+    # These are on the record, not only in the database, because the officer
+    # surface reads fresh reports through `list_fresh()`. Without them here the
+    # coordinates would be accepted by the endpoint, written to Postgres, and
+    # still never reach the person deciding what to send a crew to -- which is
+    # the same class of silent loss that kept them out of the endpoint.
+    latitude: float | None = None
+    longitude: float | None = None
+    # "point" when the reporter's device gave a fix, "locality_label" when the
+    # best we have is the name they typed. Grouping and dedup treat these very
+    # differently, so the difference is recorded rather than inferred from
+    # whether latitude happens to be null.
+    location_precision: Literal["point", "locality_label"] = "locality_label"
     analysis_result_class: Literal["stored_sample", "fresh_fixture", "fresh_ai"] | None = None
+    interpretation_category: str | None = None
+    interpretation_summary: str | None = None
+    safety_signal_codes: tuple[str, ...] = ()
     voice_object_key: str | None = None
     voice_content_type: str | None = None
 
@@ -55,6 +74,10 @@ class IntakeRepository(Protocol):
     ) -> IntakeRecord: ...
 
     def get_by_public_id(self, public_id: str) -> IntakeRecord: ...
+
+    def get_by_id(self, report_id: UUID) -> IntakeRecord: ...
+
+    def list_fresh(self) -> list[IntakeRecord]: ...
 
     def complete_analysis(
         self,
@@ -106,6 +129,13 @@ class MemoryIntakeRepository:
                 original_text=payload.description,
                 language_hint=payload.language_hint,
                 processing_state="received",
+                latitude=payload.latitude,
+                longitude=payload.longitude,
+                # Mirrors the SQL adapter's rule exactly. Two adapters deriving
+                # this differently would make the demo and the deployed system
+                # group reports differently, which is the worst kind of
+                # difference: invisible until somebody compares two screens.
+                location_precision="point" if payload.latitude is not None else "locality_label",
                 voice_object_key=voice.object_key if voice else None,
                 voice_content_type=voice.content_type if voice else None,
             )
@@ -118,6 +148,21 @@ class MemoryIntakeRepository:
             return self._by_public_id[public_id]
         except KeyError as exc:
             raise NotFoundError("Receipt not found") from exc
+
+    def get_by_id(self, report_id: UUID) -> IntakeRecord:
+        with self._lock:
+            for record in self._by_public_id.values():
+                if record.id == report_id:
+                    return record
+        raise NotFoundError("Fresh report not found")
+
+    def list_fresh(self) -> list[IntakeRecord]:
+        with self._lock:
+            return sorted(
+                self._by_public_id.values(),
+                key=lambda item: item.accepted_at,
+                reverse=True,
+            )
 
     def complete_analysis(
         self,
@@ -133,6 +178,9 @@ class MemoryIntakeRepository:
                 current,
                 processing_state="needs_review" if findings else "processed",
                 analysis_result_class=envelope.result_class,
+                interpretation_category=envelope.interpretation.category,
+                interpretation_summary=envelope.interpretation.summary,
+                safety_signal_codes=tuple(finding.signal_code for finding in findings),
             )
             self._by_public_id[public_id] = completed
             self._by_idempotency[current.idempotency_key] = completed
@@ -252,7 +300,61 @@ class SqlAlchemyIntakeRepository:
             voice = session.scalar(
                 select(ReportMediaModel).where(ReportMediaModel.report_id == report.id)
             )
-            return _record_from_model(report, interpretation, voice)
+            findings = list(
+                session.scalars(
+                    select(SafetyReviewModel).where(SafetyReviewModel.report_id == report.id)
+                )
+            )
+            return _record_from_model(report, interpretation, voice, findings)
+
+    def get_by_id(self, report_id: UUID) -> IntakeRecord:
+        with self._session_factory() as session:
+            report = session.scalar(select(ReportModel).where(ReportModel.id == report_id))
+            if report is None or report.is_seed:
+                raise NotFoundError("Fresh report not found")
+            interpretation = session.scalar(
+                select(ReportInterpretationModel).where(
+                    ReportInterpretationModel.report_id == report.id,
+                    ReportInterpretationModel.is_active.is_(True),
+                )
+            )
+            voice = session.scalar(
+                select(ReportMediaModel).where(ReportMediaModel.report_id == report.id)
+            )
+            findings = list(
+                session.scalars(
+                    select(SafetyReviewModel).where(SafetyReviewModel.report_id == report.id)
+                )
+            )
+            return _record_from_model(report, interpretation, voice, findings)
+
+    def list_fresh(self) -> list[IntakeRecord]:
+        with self._session_factory() as session:
+            reports = list(
+                session.scalars(
+                    select(ReportModel)
+                    .where(ReportModel.is_seed.is_(False))
+                    .order_by(ReportModel.accepted_at.desc())
+                )
+            )
+            records: list[IntakeRecord] = []
+            for report in reports:
+                interpretation = session.scalar(
+                    select(ReportInterpretationModel).where(
+                        ReportInterpretationModel.report_id == report.id,
+                        ReportInterpretationModel.is_active.is_(True),
+                    )
+                )
+                voice = session.scalar(
+                    select(ReportMediaModel).where(ReportMediaModel.report_id == report.id)
+                )
+                findings = list(
+                    session.scalars(
+                        select(SafetyReviewModel).where(SafetyReviewModel.report_id == report.id)
+                    )
+                )
+                records.append(_record_from_model(report, interpretation, voice, findings))
+            return records
 
     def complete_analysis(
         self,
@@ -361,7 +463,9 @@ def _record_from_model(
     report: ReportModel,
     interpretation: ReportInterpretationModel | None = None,
     voice: ReportMediaModel | None = None,
+    findings: list[SafetyReviewModel] | None = None,
 ) -> IntakeRecord:
+    payload = interpretation.payload if interpretation is not None else {}
     return IntakeRecord(
         id=report.id,
         public_id=report.public_id,
@@ -373,6 +477,12 @@ def _record_from_model(
         original_text=report.original_text,
         language_hint=report.language_hint or "unknown",
         processing_state=report.processing_state,
+        # Read back out, not just written in. The columns have been populated
+        # since the first migration, but nothing ever mapped them onto the record,
+        # so the coordinates were durable and unreadable at the same time.
+        latitude=_optional_float(report.latitude),
+        longitude=_optional_float(report.longitude),
+        location_precision="point" if report.latitude is not None else "locality_label",
         analysis_result_class=(
             "stored_sample"
             if interpretation is not None and interpretation.provider == "fixture-seed"
@@ -382,6 +492,13 @@ def _record_from_model(
             if interpretation is not None
             else None
         ),
+        interpretation_category=(
+            str(payload.get("category")) if payload.get("category") is not None else None
+        ),
+        interpretation_summary=(
+            str(payload.get("summary")) if payload.get("summary") is not None else None
+        ),
+        safety_signal_codes=tuple(finding.signal_code for finding in findings or []),
         voice_object_key=voice.object_key if voice else None,
         voice_content_type=voice.content_type if voice else None,
     )
