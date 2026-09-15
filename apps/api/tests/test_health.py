@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from civiclens.api.health import live, ready, version
 from civiclens.bootstrap.settings import Settings
 from civiclens.main import app
+from civiclens.modules.intake.service import get_intake_repository
 from civiclens.modules.planning.api import need_workspace, overview
 from civiclens.modules.planning.read_service import get_golden_demo_read_service
 
@@ -41,7 +42,7 @@ def test_preview_readiness_fails_when_required_configuration_is_missing() -> Non
 
 def test_golden_demo_route_functions_serialize_the_seeded_lifecycle() -> None:
     service = get_golden_demo_read_service()
-    overview_response = asyncio.run(overview(service))
+    overview_response = asyncio.run(overview(service, get_intake_repository()))
     workspace = asyncio.run(need_workspace(overview_response.planning_needs[0].id, service))
 
     assert workspace.hypothesis_label == "Suspected Civic Need"
