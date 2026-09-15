@@ -13,7 +13,21 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", get_settings().database_url)
+database_url = get_settings().database_url
+if not database_url.startswith("postgresql"):
+    # The core schema uses JSONB and the spatial schema uses PostGIS geography
+    # columns, neither of which SQLite can render. Without this guard the failure
+    # surfaces as a SQLAlchemy CompileError deep inside create_all, which reads
+    # like a code defect rather than a misconfigured DATABASE_URL.
+    raise RuntimeError(
+        "Migrations require PostgreSQL, but DATABASE_URL is "
+        f"{database_url.split(':', 1)[0]!r}.\n"
+        "Set DATABASE_URL in apps/api/.env to:\n"
+        "  postgresql+psycopg://civiclens:civiclens@localhost:5432/civiclens\n"
+        "Then ensure PostGIS is available: sudo infra/bootstrap-local-db.sh"
+    )
+
+config.set_main_option("sqlalchemy.url", database_url)
 target_metadata = Base.metadata
 
 
