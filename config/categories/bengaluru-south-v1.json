@@ -1,0 +1,137 @@
+{
+  "version": "bengaluru-south-v1",
+  "categories": [
+    {
+      "code": "ELECTRICAL_HAZARD",
+      "label_en": "Exposed wire / shock risk",
+      "label_kn": "ತೆರೆದ ವಿದ್ಯುತ್ ತಂತಿ / ಶಾಕ್ ಅಪಾಯ",
+      "agency": "BESCOM",
+      "sla_days": 1,
+      "severity_ceiling": 95,
+      "grouping_geometry": "point_asset",
+      "lane_1_eligible": true,
+      "rankable": true
+    },
+    {
+      "code": "WATER_CONTAMINATION",
+      "label_en": "Dirty or smelly water",
+      "label_kn": "ಕೊಳಕು ಅಥವಾ ವಾಸನೆ ಬರುವ ನೀರು",
+      "agency": "BWSSB",
+      "sla_days": 1,
+      "severity_ceiling": 90,
+      "grouping_geometry": "areal_locality",
+      "lane_1_eligible": true,
+      "rankable": true
+    },
+    {
+      "code": "SEWAGE_OVERFLOW",
+      "label_en": "Sewage overflowing",
+      "label_kn": "ಒಳಚರಂಡಿ ಉಕ್ಕಿ ಹರಿಯುತ್ತಿದೆ",
+      "agency": "BWSSB",
+      "sla_days": 2,
+      "severity_ceiling": 90,
+      "grouping_geometry": "areal_locality",
+      "lane_1_eligible": true,
+      "rankable": true
+    },
+    {
+      "code": "TREE_HAZARD",
+      "label_en": "Dangerous / fallen tree",
+      "label_kn": "ಅಪಾಯಕಾರಿ / ಬಿದ್ದ ಮರ",
+      "agency": "BSCC",
+      "sla_days": 2,
+      "severity_ceiling": 80,
+      "grouping_geometry": "point_asset",
+      "lane_1_eligible": false,
+      "rankable": true
+    },
+    {
+      "code": "WATER_SUPPLY",
+      "label_en": "No water supply",
+      "label_kn": "ನೀರು ಸರಬರಾಜು ಇಲ್ಲ",
+      "agency": "BWSSB",
+      "sla_days": 3,
+      "severity_ceiling": 75,
+      "grouping_geometry": "areal_locality",
+      "lane_1_eligible": false,
+      "rankable": true
+    },
+    {
+      "code": "WATERLOGGING",
+      "label_en": "Flooding / stagnant water",
+      "label_kn": "ಪ್ರವಾಹ / ನಿಂತ ನೀರು",
+      "agency": "BSCC",
+      "sla_days": 3,
+      "severity_ceiling": 70,
+      "grouping_geometry": "linear_road",
+      "lane_1_eligible": false,
+      "rankable": true
+    },
+    {
+      "code": "GARBAGE",
+      "label_en": "Garbage not cleared",
+      "label_kn": "ಕಸ ತೆಗೆದಿಲ್ಲ",
+      "agency": "BSCC",
+      "sla_days": 3,
+      "severity_ceiling": 55,
+      "grouping_geometry": "areal_locality",
+      "lane_1_eligible": false,
+      "rankable": true
+    },
+    {
+      "code": "STREET_LIGHT",
+      "label_en": "Street light not working",
+      "label_kn": "ಬೀದಿ ದೀಪ ಕೆಲಸ ಮಾಡುತ್ತಿಲ್ಲ",
+      "agency": "BSCC",
+      "sla_days": 7,
+      "severity_ceiling": 45,
+      "grouping_geometry": "linear_road",
+      "lane_1_eligible": false,
+      "rankable": true
+    },
+    {
+      "code": "STRAY_ANIMALS",
+      "label_en": "Stray animal problem",
+      "label_kn": "ಬೀಡಾಡಿ ಪ್ರಾಣಿಗಳ ಸಮಸ್ಯೆ",
+      "agency": "BSCC",
+      "sla_days": 7,
+      "severity_ceiling": 50,
+      "grouping_geometry": "areal_locality",
+      "lane_1_eligible": false,
+      "rankable": true
+    },
+    {
+      "code": "BUS_STOP",
+      "label_en": "Bus stop damaged / missing",
+      "label_kn": "ಬಸ್ ನಿಲ್ದಾಣ ಹಾಳಾಗಿದೆ / ಇಲ್ಲ",
+      "agency": "BMTC",
+      "sla_days": 10,
+      "severity_ceiling": 40,
+      "grouping_geometry": "point_asset",
+      "lane_1_eligible": false,
+      "rankable": true
+    },
+    {
+      "code": "ROAD_DAMAGE",
+      "label_en": "Pothole / broken road",
+      "label_kn": "ಗುಂಡಿ / ಹಾಳಾದ ರಸ್ತೆ",
+      "agency": "BSCC",
+      "sla_days": 15,
+      "severity_ceiling": 65,
+      "grouping_geometry": "linear_road",
+      "lane_1_eligible": false,
+      "rankable": true
+    },
+    {
+      "code": "OTHER",
+      "label_en": "Something else",
+      "label_kn": "ಬೇರೆ ಏನಾದರೂ",
+      "agency": null,
+      "sla_days": 7,
+      "severity_ceiling": null,
+      "grouping_geometry": "areal_locality",
+      "lane_1_eligible": false,
+      "rankable": false
+    }
+  ]
+}
