@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     fresh_ai_daily_cap: int = Field(default=50, ge=0, le=1000)
     log_level: str = "INFO"
 
-    schema_version: str = "20260912_0001"
+    schema_version: str = "20260915_0002"
     prompt_version: str = "report-interpretation-v1"
     rules_version: str = "civic-rules-v1"
     catalogue_version: str = "assessment-catalogue-v1"

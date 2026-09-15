@@ -1,4 +1,4 @@
-.PHONY: install dev-db dev-db-down migrate seed api web check test build
+.PHONY: install dev-db dev-db-down migrate seed osm-fetch osm-ingest osm-dry-run api web check test build
 
 install:
 	npm install
@@ -15,6 +15,17 @@ migrate:
 
 seed:
 	cd apps/api && uv run python -m civiclens.infrastructure.db.seed --confirm-demo
+
+# Offline OpenStreetMap reference data. osm-fetch downloads ~128 MB once;
+# osm-dry-run parses it and reports counts without touching the database.
+osm-fetch:
+	cd apps/api && uv run python -m civiclens.infrastructure.osm.fetch
+
+osm-dry-run:
+	cd apps/api && uv run python -m civiclens.infrastructure.osm.ingest --dry-run
+
+osm-ingest:
+	cd apps/api && uv run python -m civiclens.infrastructure.osm.ingest
 
 api:
 	cd apps/api && uv run uvicorn civiclens.main:app --reload --port 8000
