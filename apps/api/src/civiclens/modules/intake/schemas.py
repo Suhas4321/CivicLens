@@ -7,7 +7,19 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class ReportCreateRequest(BaseModel):
-    description: str = Field(min_length=20, max_length=2000)
+    # Four characters, not twenty.
+    #
+    # Twenty characters of prose is a real barrier for the people this is for: a
+    # street vendor typing Kannada on a phone, or somebody who does not write
+    # comfortably in any language. The category, the photo and the location now
+    # carry the classification, the severity and the grouping, so the text only
+    # has to be enough for the interpreter to check what the reporter meant.
+    #
+    # The floor is 4 because that is `analysis.schemas.InterpretationRequest.text`'s
+    # own minimum. Keeping the two equal is deliberate: a report accepted here that
+    # the interpreter then refuses would crash the analysis background task rather
+    # than degrade, so these two numbers must move together.
+    description: str = Field(min_length=4, max_length=2000)
     language_hint: Literal["en", "kn", "hi", "mixed"] = "en"
     locality_label: str = Field(min_length=3, max_length=160)
     latitude: float | None = Field(default=None, ge=-90, le=90)
