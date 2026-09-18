@@ -1,7 +1,12 @@
 # REBUILD 07 — Where the build actually is, and what is left
 
 **Written:** 2026-09-19
-**Branch this describes:** `feat/web-two-surface-redesign` (tip of a 7-branch stack onto `master`)
+**Branch this describes:** `feat/photo-intake-and-service-code` — PR #10, the **tip** of a
+stack of 7 open PRs onto `master`. The stack, tip first: #10 → #9
+`feat/web-two-surface-redesign` → #8 `feat/officer-api-fresh-reports-and-reviews` → #7
+`feat/intake-coordinates-and-text-floor` → #5 `feat/ward-geography-osm` → #3
+`feat/domain-priority-rules` → #1 `chore/repo-hygiene-and-design-docs` → `master`.
+Work on the tip; everything below it is already written.
 **Purpose:** this file is the handoff. It is written so that a new chat session, with
 no memory of any previous one, can read this file alone and carry on correctly. Where
 it disagrees with `REBUILD_00`–`REBUILD_06`, **this file wins** — those describe the
