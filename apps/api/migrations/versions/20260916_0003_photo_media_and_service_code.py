@@ -177,11 +177,52 @@ def _has_constraint(bind: Connection, table: str, name: str) -> bool:
     )
 
 
+def _check_constraint_names(bind: Connection, table: str, name: str) -> list[str]:
+    """Every name this CHECK could be stored under, as PostgreSQL actually holds it.
+
+    ``Base.metadata`` carries the convention ``ck_%(table_name)s_%(constraint_name)s``,
+    and because that template contains ``%(constraint_name)s``, SQLAlchemy applies it
+    even to a constraint that was given a name -- so the model's
+    ``name="media_type_allowed"`` reaches the database as
+    ``ck_report_media_media_type_allowed``. Alembic applies the same convention to the
+    DDL it emits, since ``env.py`` hands it ``target_metadata``.
+
+    Asking the catalogue for the short name therefore always missed, and every "if
+    absent" guard in this revision was unconditionally true. The first CHECK it tried
+    to add already existed and the upgrade died -- on precisely the database shape the
+    module docstring says it must tolerate. Both spellings are looked up rather than
+    only the long one, because a database whose constraints predate the convention
+    would hold the short form.
+    """
+
+    rows = bind.execute(
+        text(
+            "SELECT c.conname FROM pg_constraint c "
+            "JOIN pg_class t ON t.oid = c.conrelid "
+            "WHERE t.relname = :table AND c.conname IN (:short, :conventional)"
+        ),
+        {"table": table, "short": name, "conventional": f"ck_{table}_{name}"},
+    )
+    return list(rows.scalars().all())
+
+
 def _drop_constraint_if_exists(bind: Connection, table: str, name: str) -> None:
-    if _has_constraint(bind, table, name):
-        op.drop_constraint(name, table, type_="check" if not name.startswith("uq_") else "unique")
+    if name.startswith("uq_"):
+        # Unique constraints are unaffected: the ``uq`` template has no
+        # ``%(constraint_name)s`` in it, so a name that was supplied survives verbatim.
+        if _has_constraint(bind, table, name):
+            op.drop_constraint(name, table, type_="unique")
+        return
+    for existing in _check_constraint_names(bind, table, name):
+        # Raw DDL against the name the catalogue returned. `op.drop_constraint` would
+        # re-apply the naming convention to whatever it is handed, which is the same
+        # mismatch that broke the guards above.
+        op.execute(f'ALTER TABLE {table} DROP CONSTRAINT "{existing}"')
 
 
 def _add_check_if_absent(bind: Connection, table: str, name: str, condition: str) -> None:
-    if not _has_constraint(bind, table, name):
-        op.create_check_constraint(name, table, condition)
+    if _check_constraint_names(bind, table, name):
+        return
+    # Named here the way the convention would name it, so this revision and
+    # ``create_all`` produce one constraint and not two spellings of it.
+    op.execute(f'ALTER TABLE {table} ADD CONSTRAINT "ck_{table}_{name}" CHECK ({condition})')
