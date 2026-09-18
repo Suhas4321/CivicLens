@@ -89,6 +89,18 @@ class ReportModel(Base):
     accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     consent_version: Mapped[str] = mapped_column(String(32), nullable=False)
     locality_label: Mapped[str] = mapped_column(String(160), nullable=False)
+    # The category the reporter chose, from config/categories/<version>.json.
+    #
+    # Nullable, and no foreign key or CHECK against the code list, both on purpose.
+    # Nullable because reports submitted before this column existed genuinely have
+    # no answer, and backfilling a guess would put a deadline on an old report that
+    # nobody ever agreed to. No constraint on the values because the catalogue is
+    # versioned policy that is expected to change: a database constraint would make
+    # retiring a category require a migration, and would make a stored report
+    # unreadable the moment the code it was filed under was withdrawn. The code list
+    # is enforced at intake, where the reporter can be told; the column's job is to
+    # remember faithfully what was chosen, including codes no longer offered.
+    service_code: Mapped[str | None] = mapped_column(String(48))
     geography_kind: Mapped[str] = mapped_column(String(48), nullable=False)
     geography_source: Mapped[str] = mapped_column(String(48), nullable=False)
     latitude: Mapped[Decimal | None] = mapped_column(Numeric(9, 6))
@@ -103,13 +115,39 @@ class ReportModel(Base):
 class ReportMediaModel(Base):
     __tablename__ = "report_media"
     __table_args__ = (
-        CheckConstraint("media_type = 'voice'", name="voice_only"),
+        CheckConstraint("media_type IN ('voice', 'photo')", name="media_type_allowed"),
         CheckConstraint(
             "validation_state IN ('pending', 'accepted', 'rejected', 'quarantined')",
             name="validation_state_allowed",
         ),
-        CheckConstraint("byte_size BETWEEN 1 AND 6291456", name="byte_size_limit"),
-        CheckConstraint("duration_seconds BETWEEN 0 AND 30", name="duration_limit"),
+        # 12 MB, the photo ceiling. Voice keeps its own 6 MB limit in
+        # `intake.voice`; this constraint is the outer bound for the widest medium,
+        # not a restatement of either module's rule.
+        CheckConstraint("byte_size BETWEEN 1 AND 12582912", name="byte_size_limit"),
+        # Duration is a property of audio, so the column is required for voice and
+        # forbidden for photo. Expressed as one constraint over both branches rather
+        # than a plain nullable column, so a photo row carrying a duration -- which
+        # would mean some code path is confusing the two -- fails at the database
+        # instead of becoming a silently meaningless number.
+        CheckConstraint(
+            "(media_type = 'voice' AND duration_seconds BETWEEN 0 AND 30) "
+            "OR (media_type = 'photo' AND duration_seconds IS NULL)",
+            name="duration_matches_media_type",
+        ),
+        # Same shape for the perceptual hash, which only means anything for an
+        # image. It is what lets two reports of the same pothole be recognised as
+        # the same pothole without any model looking at either photo.
+        CheckConstraint(
+            "(media_type = 'photo' AND perceptual_hash IS NOT NULL) "
+            "OR (media_type = 'voice' AND perceptual_hash IS NULL)",
+            name="perceptual_hash_matches_media_type",
+        ),
+        # At most one of each medium per report. Without this, a retry that
+        # half-succeeded could leave two photo rows, and every read path below uses
+        # a single-row lookup -- it would return whichever row the planner happened
+        # to produce first, which is the kind of bug that reproduces only in
+        # production.
+        UniqueConstraint("report_id", "media_type", name="uq_report_media_one_per_type"),
     )
 
     id: Mapped[UUID] = uuid_pk()
@@ -119,7 +157,17 @@ class ReportMediaModel(Base):
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     content_type: Mapped[str] = mapped_column(String(80), nullable=False)
     byte_size: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    duration_seconds: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
+    duration_seconds: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    perceptual_hash: Mapped[str | None] = mapped_column(String(16))
+    # Coarse, officer-facing conclusions from the photo's EXIF: undated, stale,
+    # future-dated, and how far the camera was from the confirmed pin bucketed to
+    # 100 m. Produced by `domain.photo_integrity.integrity_flags`.
+    #
+    # The flags are stored; the EXIF they came from is not, anywhere. That is the
+    # entire design: an officer needs to know a photo was taken a kilometre from the
+    # pin, and nobody needs to know the coordinates of the person who took it. This
+    # column must therefore never be widened to hold the raw values.
+    integrity_flags: Mapped[JsonObject | None] = mapped_column(JSONB)
     validation_state: Mapped[str] = mapped_column(String(24), nullable=False)
     retain_until: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_at: Mapped[datetime] = created_at_column()

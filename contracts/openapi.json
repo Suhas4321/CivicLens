@@ -55,6 +55,30 @@
             ],
             "title": "Longitude"
           },
+          "photo": {
+            "anyOf": [
+              {
+                "contentMediaType": "application/octet-stream",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo"
+          },
+          "service_code": {
+            "anyOf": [
+              {
+                "maxLength": 48,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Code"
+          },
           "synthetic_demo_confirmation": {
             "title": "Synthetic Demo Confirmation",
             "type": "boolean"
@@ -1152,9 +1176,25 @@
             "title": "Message",
             "type": "string"
           },
+          "photo_received": {
+            "default": false,
+            "title": "Photo Received",
+            "type": "boolean"
+          },
           "public_id": {
             "title": "Public Id",
             "type": "string"
+          },
+          "service_code_recorded": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Code Recorded"
           },
           "status": {
             "const": "received",
