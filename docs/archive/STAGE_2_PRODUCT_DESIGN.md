@@ -1,3 +1,10 @@
+> # ⚠️ ARCHIVED — DO NOT IMPLEMENT FROM THIS DOCUMENT
+> Superseded 15 September 2026 by `docs/REBUILD_00` … `REBUILD_05`. Kept as a historical record only.
+> **Keep:** §5 citizen journey, §7 Screen 3 "Review understanding", the Citizen UX decisions list, the failure-paths table, the five provenance labels, the fourteen acceptance criteria.
+> **Reject:** §13's "not primarily a grievance tracker."
+> **Note:** §7 Screen 2 (photo upload) and §8 (map pin) were *correct*. Stage 6 removed them. `REBUILD_03` and `REBUILD_05 §1` restore them.
+> See `docs/archive/README.md`.
+
 # CivicLens AI — Stage 2 Product Design
 
 > **Final-scope note:** Stage 6 preserves this product lifecycle but narrows the hackathon implementation to text plus one short voice attachment, removes maps/images from v1, and consolidates officer evidence/candidate/decision sections into one Need workspace. See [Stage 6 Final Design Review](./STAGE_6_FINAL_DESIGN_REVIEW.md).

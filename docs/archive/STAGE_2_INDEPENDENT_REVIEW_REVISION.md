@@ -1,3 +1,9 @@
+> # ⚠️ ARCHIVED — DO NOT IMPLEMENT FROM THIS DOCUMENT
+> Superseded 15 September 2026 by `docs/REBUILD_00` … `REBUILD_05`. Kept as a historical record only.
+> **Keep:** §B's two-lane split — the ancestor of the three-lane model in `REBUILD_04 §3`.
+> **Reject:** the `30/25/25/20` ordinal components and the three sensitivity profiles. Removing acute urgency from ranking was the wrong call; see `REBUILD_04 §5`.
+> See `docs/archive/README.md`.
+
 # CivicLens — Independent Review and Focused Stage 2 Revision
 
 **Status:** Planning only  

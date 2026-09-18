@@ -1,3 +1,10 @@
+> # ⚠️ ARCHIVED — DO NOT IMPLEMENT FROM THIS DOCUMENT
+> Superseded 15 September 2026 by `docs/REBUILD_00` … `REBUILD_05`. Kept as a historical record only.
+> **Keep:** §3 stack, §4 repo structure, §5 module template and the eight ports, **§8 media handling (re-activated for images)**, §11 config/secrets, §12 deployment, §13 cost, §14 testing pyramid, §16 observability, §17 local dev, §19 risk review, §20 evidence table.
+> **Reject:** §1's Google Maps JavaScript API → MapLibre GL + self-hosted `.pmtiles` (`REBUILD_05 §1.3`). §45's "No PostGIS" → PostGIS is mandatory (`REBUILD_05 §2.1`).
+> **Worth knowing:** §18 classified "one short voice and one image" as **Must Have**. Images were designed in here and removed later by Stage 6.
+> See `docs/archive/README.md`.
+
 # CivicLens AI — Stage 4 Implementation Design
 
 **Status:** Planning complete; implementation approved on 12 September 2026  

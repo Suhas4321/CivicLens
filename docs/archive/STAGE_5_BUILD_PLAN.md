@@ -1,3 +1,10 @@
+> # ⚠️ ARCHIVED — DO NOT IMPLEMENT FROM THIS DOCUMENT
+> Superseded 15 September 2026 by `docs/REBUILD_00` … `REBUILD_05`. Kept as a historical record only.
+> **The build order now lives in `REBUILD_05 §10`.** Do not follow the M0–M9 milestones or the `R→D→S→G→I→J→A→C→N→E→P→H→X→Q→U` critical path — both assume the Golden-Demo read path that is being replaced.
+> **Keep as process:** §3 Definition of Done and stop-the-line conditions, §16 test matrix, §17 the 26-slice PR granularity model, §19 scope-cut order, §20 release scorecard, §15 submission checklist.
+> **Reject:** §2's BWSSB/JICA 110-village and Mahadevapura geography — the target is Bengaluru **South**. §20's "needs/projects — not complaints — are prioritised" is the inversion written as a release criterion.
+> See `docs/archive/README.md`.
+
 # CivicLens AI — Stage 5 Build Plan
 
 **Status:** Approved build plan; implementation started on 12 September 2026  

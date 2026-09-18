@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run web:typecheck
+      - run: npm run web:build
+
+  api:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql+psycopg://civiclens:civiclens@localhost:5432/civiclens_test
+      RUN_POSTGRES_TESTS: "1"
+    services:
+      postgres:
+        # Must match compose.yaml. Migration 20260915_0002 checks for PostGIS and
+        # raises rather than emitting geography columns against a server that
+        # cannot store them, so plain postgres fails the upgrade step outright.
+        # This image enables the extension on first start; CREATE EXTENSION needs
+        # superuser, which the application role deliberately is not.
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: civiclens
+          POSTGRES_PASSWORD: civiclens
+          POSTGRES_DB: civiclens_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U civiclens -d civiclens_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.28"
+          enable-cache: true
+      - run: uv sync --locked
+        working-directory: apps/api
+      - run: uv run alembic upgrade head
+        working-directory: apps/api
+      - run: uv run alembic downgrade base
+        working-directory: apps/api
+      - run: uv run alembic upgrade head
+        working-directory: apps/api
+      - run: uv run python -m civiclens.infrastructure.db.seed --confirm-demo
+        working-directory: apps/api
+      - run: uv run python -m civiclens.infrastructure.db.seed --confirm-demo
+        working-directory: apps/api
+      - run: uv run ruff check .
+        working-directory: apps/api
+      - run: uv run pyright
+        working-directory: apps/api
+      - run: uv run python scripts/export_openapi.py --check
+        working-directory: apps/api
+      - run: uv run pytest
+        working-directory: apps/api

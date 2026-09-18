@@ -1,3 +1,10 @@
+> # ⚠️ ARCHIVED — DO NOT IMPLEMENT FROM THIS DOCUMENT
+> Superseded 15 September 2026 by `docs/REBUILD_00` … `REBUILD_05`. Kept as a historical record only.
+> **This document was previously labelled "authoritative" and is the proximate cause of the two biggest product gaps.** §4 "Deferred from v1" removed image upload and any map; that removal was then encoded as a prohibition in `AGENTS.md`. Both features are now **required**.
+> **Keep:** §14 security risk table and release blockers, §3 anticipated challenges, and its warning against pseudo-precision in published metrics — honoured by the `n < 5` suppression rule in `REBUILD_05 §7.3`.
+> **Reject:** §4 deferrals, §7's Mahadevapura geography, §9's PostGIS exclusion, §12 intake, §13 priority policy, the `/officer/needs/:id` route, the 60-report corpus.
+> See `docs/archive/README.md`.
+
 # CivicLens AI — Stage 6 Final Design Review
 
 **Status:** Final planning stage complete; implementation approved on 12 September 2026  
