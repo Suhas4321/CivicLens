@@ -370,7 +370,14 @@ class DatasetSnapshotModel(Base):
     reference_date: Mapped[date | None] = mapped_column(Date)
     retrieved_at: Mapped[date] = mapped_column(Date, nullable=False)
     normalized_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
-    source_format: Mapped[str] = mapped_column(String(48), nullable=False)
+    # 120, not 48. This is prose describing where a figure came from -- the demo
+    # water dataset's own answer is "official PDF tables and official HTML
+    # announcement", which is 50 characters and overflowed the original width the
+    # first time seeding ran against a real PostgreSQL server. Truncating it was the
+    # alternative, and provenance is the wrong thing to shorten to fit a column.
+    # Still bounded rather than Text: it describes a format, and a field with no
+    # ceiling becomes somewhere to put a paragraph.
+    source_format: Mapped[str] = mapped_column(String(120), nullable=False)
     license_status: Mapped[str] = mapped_column(String(80), nullable=False)
     review_status: Mapped[str] = mapped_column(String(24), nullable=False)
     manifest: Mapped[JsonObject] = mapped_column(JSONB, nullable=False)
