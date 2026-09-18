@@ -4,13 +4,12 @@
       "Body_submit_report_api_v1_reports_post": {
         "properties": {
           "consent": {
-            "const": true,
             "title": "Consent",
             "type": "boolean"
           },
           "description": {
             "maxLength": 2000,
-            "minLength": 20,
+            "minLength": 4,
             "title": "Description",
             "type": "string"
           },
@@ -24,14 +23,39 @@
             "title": "Language Hint",
             "type": "string"
           },
+          "latitude": {
+            "anyOf": [
+              {
+                "maximum": 90.0,
+                "minimum": -90.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
           "locality_label": {
             "maxLength": 160,
             "minLength": 3,
             "title": "Locality Label",
             "type": "string"
           },
+          "longitude": {
+            "anyOf": [
+              {
+                "maximum": 180.0,
+                "minimum": -180.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
           "synthetic_demo_confirmation": {
-            "const": true,
             "title": "Synthetic Demo Confirmation",
             "type": "boolean"
           },
@@ -1298,6 +1322,123 @@
         ],
         "title": "VersionResponse",
         "type": "object"
+      },
+      "WorkflowReview": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "confirm_bounded_incident",
+              "keep_separate",
+              "verify_safety",
+              "refer_safety",
+              "dismiss_safety"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "entity_version_after": {
+            "title": "Entity Version After",
+            "type": "integer"
+          },
+          "evidence_digest": {
+            "title": "Evidence Digest",
+            "type": "string"
+          },
+          "expected_version": {
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "record_notice": {
+            "default": "Append-only synthetic review action. It does not verify the citizen claim or authorize an official response.",
+            "title": "Record Notice",
+            "type": "string"
+          },
+          "report_id": {
+            "format": "uuid",
+            "title": "Report Id",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "supersedes_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supersedes Id"
+          }
+        },
+        "required": [
+          "id",
+          "session_id",
+          "report_id",
+          "action",
+          "reason",
+          "evidence_digest",
+          "expected_version",
+          "entity_version_after",
+          "supersedes_id",
+          "created_at"
+        ],
+        "title": "WorkflowReview",
+        "type": "object"
+      },
+      "WorkflowReviewCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "confirm_bounded_incident",
+              "keep_separate",
+              "verify_safety",
+              "refer_safety",
+              "dismiss_safety"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "reason": {
+            "maxLength": 600,
+            "minLength": 8,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action",
+          "reason",
+          "expected_version"
+        ],
+        "title": "WorkflowReviewCreate",
+        "type": "object"
       }
     }
   },
@@ -1675,6 +1816,157 @@
         "summary": "Overview",
         "tags": [
           "officer-demo"
+        ]
+      }
+    },
+    "/api/v1/officer/reports/{report_id}/reviews": {
+      "get": {
+        "operationId": "workflow_review_history_api_v1_officer_reports__report_id__reviews_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Demo-Session-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "X-Demo-Session-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "maxLength": 256,
+              "minLength": 39,
+              "title": "Authorization",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkflowReview"
+                  },
+                  "title": "Response Workflow Review History Api V1 Officer Reports  Report Id  Reviews Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Workflow Review History",
+        "tags": [
+          "workflow-reviews"
+        ]
+      },
+      "post": {
+        "operationId": "record_workflow_review_api_v1_officer_reports__report_id__reviews_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Demo-Session-ID",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "X-Demo-Session-Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "schema": {
+              "maxLength": 256,
+              "minLength": 39,
+              "title": "Authorization",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowReviewCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowReview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Workflow Review",
+        "tags": [
+          "workflow-reviews"
         ]
       }
     },

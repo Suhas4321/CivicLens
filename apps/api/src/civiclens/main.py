@@ -17,6 +17,7 @@ from civiclens.modules.decisions.api import router as decisions_router
 from civiclens.modules.demo_sessions.api import router as demo_sessions_router
 from civiclens.modules.intake.api import router as intake_router
 from civiclens.modules.planning.api import router as planning_router
+from civiclens.modules.workflow_reviews.api import router as workflow_reviews_router
 
 settings = get_settings()
 configure_logging(settings.log_level)
@@ -103,3 +104,4 @@ app.include_router(demo_sessions_router, prefix="/api/v1")
 app.include_router(intake_router, prefix="/api/v1")
 app.include_router(planning_router, prefix="/api/v1")
 app.include_router(decisions_router, prefix="/api/v1")
+app.include_router(workflow_reviews_router, prefix="/api/v1")
