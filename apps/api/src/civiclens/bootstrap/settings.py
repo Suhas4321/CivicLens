@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     session_backend: Literal["memory", "postgres"] = "memory"
     decision_backend: Literal["memory", "postgres"] = "memory"
     voice_backend: Literal["memory", "gcs"] = "memory"
+    photo_backend: Literal["memory", "gcs"] = "memory"
     gemini_model: str = "gemini-3.6-flash"
     gemini_api_key: SecretStr = SecretStr("")
     demo_mode_enabled: bool = True
@@ -43,7 +44,7 @@ class Settings(BaseSettings):
     fresh_ai_daily_cap: int = Field(default=50, ge=0, le=1000)
     log_level: str = "INFO"
 
-    schema_version: str = "20260915_0002"
+    schema_version: str = "20260916_0003"
     prompt_version: str = "report-interpretation-v1"
     rules_version: str = "civic-rules-v1"
     catalogue_version: str = "assessment-catalogue-v1"
@@ -86,6 +87,11 @@ class Settings(BaseSettings):
                 missing.append("DECISION_BACKEND=postgres")
             if self.voice_backend != "gcs":
                 missing.append("VOICE_BACKEND=gcs")
+            # Listed for the same reason as voice: the memory backend loses every
+            # object when the process restarts. A deployed instance serving photos
+            # from a dict would hand officers broken images after any redeploy.
+            if self.photo_backend != "gcs":
+                missing.append("PHOTO_BACKEND=gcs")
             if not self.gcs_media_bucket:
                 missing.append("GCS_MEDIA_BUCKET")
             if self.app_env == "production" and self.ai_backend != "vertex":

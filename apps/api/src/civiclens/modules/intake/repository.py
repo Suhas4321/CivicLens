@@ -4,12 +4,13 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 from decimal import Decimal
 from threading import Lock
-from typing import Literal, Protocol
+from typing import Literal, Protocol, cast
 from uuid import UUID, uuid4
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
+from civiclens.domain.photo_integrity import Flag
 from civiclens.infrastructure.db.models import (
     ProcessingJobModel,
     ReportInterpretationModel,
@@ -17,11 +18,15 @@ from civiclens.infrastructure.db.models import (
     ReportModel,
     SafetyReviewModel,
 )
+from civiclens.infrastructure.media.photo_storage import StoredPhoto
 from civiclens.infrastructure.media.voice_storage import StoredVoice
 from civiclens.modules.analysis.schemas import InterpretationEnvelope
 from civiclens.modules.intake.schemas import ReportCreateRequest
 from civiclens.modules.safety.evaluator import SafetyFinding
 from civiclens.shared.errors import ConflictError, NotFoundError
+
+VOICE = "voice"
+PHOTO = "photo"
 
 
 @dataclass(frozen=True)
@@ -58,6 +63,22 @@ class IntakeRecord:
     safety_signal_codes: tuple[str, ...] = ()
     voice_object_key: str | None = None
     voice_content_type: str | None = None
+    # The category the reporter chose, or None if they did not choose one. Carried on
+    # the record because the officer surface routes by it, and because the statutory
+    # deadline is derived from it -- `domain.sla.due_at` needs this exact code.
+    service_code: str | None = None
+    photo_object_key: str | None = None
+    photo_content_type: str | None = None
+    # Coarse EXIF conclusions, already reduced to flag codes. The raw EXIF is never
+    # on this record and must never be added to it; see `domain.photo_integrity`.
+    photo_integrity_codes: tuple[str, ...] = ()
+    # The difference hash of the photo. On the record because grouping uses it to tell
+    # two reports of one flooded junction from two reports of different things at the
+    # same junction -- which is the question coordinates cannot answer. Derived from
+    # image content only: the EXIF, including where the photo was taken, was destroyed
+    # before these bytes existed. Never returned from an API; it is a grouping input,
+    # not something an officer or a reporter has any use for.
+    photo_perceptual_hash: str | None = None
 
 
 class IntakeRepository(Protocol):
@@ -71,6 +92,8 @@ class IntakeRepository(Protocol):
         request_fingerprint: str,
         accepted_at: datetime,
         voice: StoredVoice | None,
+        photo: StoredPhoto | None = None,
+        photo_flags: tuple[Flag, ...] = (),
     ) -> IntakeRecord: ...
 
     def get_by_public_id(self, public_id: str) -> IntakeRecord: ...
@@ -107,6 +130,8 @@ class MemoryIntakeRepository:
         request_fingerprint: str,
         accepted_at: datetime,
         voice: StoredVoice | None,
+        photo: StoredPhoto | None = None,
+        photo_flags: tuple[Flag, ...] = (),
     ) -> IntakeRecord:
         with self._lock:
             existing = self._by_idempotency.get(idempotency_key)
@@ -136,8 +161,13 @@ class MemoryIntakeRepository:
                 # group reports differently, which is the worst kind of
                 # difference: invisible until somebody compares two screens.
                 location_precision="point" if payload.latitude is not None else "locality_label",
+                service_code=payload.service_code,
                 voice_object_key=voice.object_key if voice else None,
                 voice_content_type=voice.content_type if voice else None,
+                photo_object_key=photo.object_key if photo else None,
+                photo_content_type=photo.content_type if photo else None,
+                photo_integrity_codes=tuple(flag.code for flag in photo_flags),
+                photo_perceptual_hash=photo.perceptual_hash if photo else None,
             )
             self._by_public_id[public_id] = record
             self._by_idempotency[idempotency_key] = record
@@ -210,6 +240,8 @@ class SqlAlchemyIntakeRepository:
         request_fingerprint: str,
         accepted_at: datetime,
         voice: StoredVoice | None,
+        photo: StoredPhoto | None = None,
+        photo_flags: tuple[Flag, ...] = (),
     ) -> IntakeRecord:
         del request_fingerprint
         with self._session_factory.begin() as session:
@@ -217,12 +249,13 @@ class SqlAlchemyIntakeRepository:
                 select(ReportModel).where(ReportModel.idempotency_key == idempotency_key)
             )
             if existing:
-                existing_voice = session.scalar(
-                    select(ReportMediaModel).where(ReportMediaModel.report_id == existing.id)
-                )
-                if not _same_submission(existing, existing_voice, payload, receipt_hash, voice):
+                existing_voice = _media(session, existing.id, VOICE)
+                existing_photo = _media(session, existing.id, PHOTO)
+                if not _same_submission(
+                    existing, existing_voice, existing_photo, payload, receipt_hash, voice, photo
+                ):
                     raise ConflictError("Idempotency key was already used")
-                return _record_from_model(existing, voice=existing_voice)
+                return _record_from_model(existing, voice=existing_voice, photo=existing_photo)
 
             report_id = uuid4()
             report = ReportModel(
@@ -232,8 +265,9 @@ class SqlAlchemyIntakeRepository:
                 public_id=public_id,
                 receipt_hash=receipt_hash,
                 idempotency_key=idempotency_key,
-                source_channel="web_text_voice" if voice else "web_text",
+                source_channel=_source_channel(voice, photo),
                 original_text=payload.description,
+                service_code=payload.service_code,
                 language_hint=payload.language_hint,
                 accepted_at=accepted_at,
                 consent_version="demo-v1",
@@ -254,7 +288,7 @@ class SqlAlchemyIntakeRepository:
                 session.add(
                     ReportMediaModel(
                         report_id=report_id,
-                        media_type="voice",
+                        media_type=VOICE,
                         object_key=voice.object_key,
                         content_hash=voice.content_hash,
                         content_type=voice.content_type,
@@ -262,6 +296,25 @@ class SqlAlchemyIntakeRepository:
                         duration_seconds=Decimal(str(voice.duration_seconds)),
                         validation_state="accepted",
                         retain_until=voice.retain_until,
+                    )
+                )
+            if photo is not None:
+                session.add(
+                    ReportMediaModel(
+                        report_id=report_id,
+                        media_type=PHOTO,
+                        object_key=photo.object_key,
+                        content_hash=photo.content_hash,
+                        content_type=photo.content_type,
+                        byte_size=photo.byte_size,
+                        # Left NULL, and the `duration_matches_media_type` constraint
+                        # requires it to be. A photo has no duration, and a zero here
+                        # would read as "a recording of no length".
+                        duration_seconds=None,
+                        perceptual_hash=photo.perceptual_hash,
+                        integrity_flags=_flags_payload(photo_flags),
+                        validation_state="accepted",
+                        retain_until=photo.retain_until,
                     )
                 )
             session.add(
@@ -277,14 +330,11 @@ class SqlAlchemyIntakeRepository:
                 )
             )
             session.flush()
-            voice_model = (
-                session.scalar(
-                    select(ReportMediaModel).where(ReportMediaModel.report_id == report_id)
-                )
-                if voice is not None
-                else None
+            return _record_from_model(
+                report,
+                voice=_media(session, report_id, VOICE) if voice is not None else None,
+                photo=_media(session, report_id, PHOTO) if photo is not None else None,
             )
-            return _record_from_model(report, voice=voice_model)
 
     def get_by_public_id(self, public_id: str) -> IntakeRecord:
         with self._session_factory() as session:
@@ -297,15 +347,14 @@ class SqlAlchemyIntakeRepository:
                     ReportInterpretationModel.is_active.is_(True),
                 )
             )
-            voice = session.scalar(
-                select(ReportMediaModel).where(ReportMediaModel.report_id == report.id)
-            )
+            voice = _media(session, report.id, VOICE)
+            photo = _media(session, report.id, PHOTO)
             findings = list(
                 session.scalars(
                     select(SafetyReviewModel).where(SafetyReviewModel.report_id == report.id)
                 )
             )
-            return _record_from_model(report, interpretation, voice, findings)
+            return _record_from_model(report, interpretation, voice, findings, photo=photo)
 
     def get_by_id(self, report_id: UUID) -> IntakeRecord:
         with self._session_factory() as session:
@@ -318,15 +367,14 @@ class SqlAlchemyIntakeRepository:
                     ReportInterpretationModel.is_active.is_(True),
                 )
             )
-            voice = session.scalar(
-                select(ReportMediaModel).where(ReportMediaModel.report_id == report.id)
-            )
+            voice = _media(session, report.id, VOICE)
+            photo = _media(session, report.id, PHOTO)
             findings = list(
                 session.scalars(
                     select(SafetyReviewModel).where(SafetyReviewModel.report_id == report.id)
                 )
             )
-            return _record_from_model(report, interpretation, voice, findings)
+            return _record_from_model(report, interpretation, voice, findings, photo=photo)
 
     def list_fresh(self) -> list[IntakeRecord]:
         with self._session_factory() as session:
@@ -345,15 +393,16 @@ class SqlAlchemyIntakeRepository:
                         ReportInterpretationModel.is_active.is_(True),
                     )
                 )
-                voice = session.scalar(
-                    select(ReportMediaModel).where(ReportMediaModel.report_id == report.id)
-                )
+                voice = _media(session, report.id, VOICE)
+                photo = _media(session, report.id, PHOTO)
                 findings = list(
                     session.scalars(
                         select(SafetyReviewModel).where(SafetyReviewModel.report_id == report.id)
                     )
                 )
-                records.append(_record_from_model(report, interpretation, voice, findings))
+                records.append(
+                    _record_from_model(report, interpretation, voice, findings, photo=photo)
+                )
             return records
 
     def complete_analysis(
@@ -373,10 +422,9 @@ class SqlAlchemyIntakeRepository:
                 )
             )
             if existing is not None:
-                voice = session.scalar(
-                    select(ReportMediaModel).where(ReportMediaModel.report_id == report.id)
-                )
-                return _record_from_model(report, existing, voice)
+                voice = _media(session, report.id, VOICE)
+                photo = _media(session, report.id, PHOTO)
+                return _record_from_model(report, existing, voice, photo=photo)
 
             interpretation_id = uuid4()
             interpretation = ReportInterpretationModel(
@@ -414,10 +462,9 @@ class SqlAlchemyIntakeRepository:
                 job.state = "succeeded"
                 job.attempt_count = min(job.attempt_count + 1, job.max_attempts)
             session.flush()
-            voice = session.scalar(
-                select(ReportMediaModel).where(ReportMediaModel.report_id == report.id)
-            )
-            return _record_from_model(report, interpretation, voice)
+            voice = _media(session, report.id, VOICE)
+            photo = _media(session, report.id, PHOTO)
+            return _record_from_model(report, interpretation, voice, photo=photo)
 
     def fail_analysis(self, public_id: str, safe_error_code: str) -> IntakeRecord:
         with self._session_factory.begin() as session:
@@ -436,22 +483,72 @@ class SqlAlchemyIntakeRepository:
             return _record_from_model(report)
 
 
+def _media(session: Session, report_id: UUID, media_type: str) -> ReportMediaModel | None:
+    """Fetch the one media row of a given type for a report, or None.
+
+    The ``media_type`` filter is the whole point of this helper existing. Before
+    photos there was exactly one media row per report, so every read path here said
+    "the media row for this report" and was right by accident. With two rows that
+    same query returns whichever one the planner reaches first -- so a report with a
+    photo could hand back a photo where the code expected a voice note, with no
+    error anywhere. Routing every lookup through here makes the type impossible to
+    forget, and ``uq_report_media_one_per_type`` guarantees the answer is unique.
+    """
+    return session.scalar(
+        select(ReportMediaModel).where(
+            ReportMediaModel.report_id == report_id,
+            ReportMediaModel.media_type == media_type,
+        )
+    )
+
+
+def _source_channel(voice: StoredVoice | None, photo: StoredPhoto | None) -> str:
+    """Describe what the reporter actually sent, for the audit trail."""
+    suffixes = ("_voice" if voice else "") + ("_photo" if photo else "")
+    return f"web_text{suffixes}"
+
+
+def _flags_payload(flags: tuple[Flag, ...]) -> dict[str, object] | None:
+    """Shape the integrity flags for the JSONB column.
+
+    Wrapped in an object rather than stored as a bare array so that a later
+    addition -- a rule version, say -- does not require rewriting existing rows or
+    teaching readers to handle two different top-level JSON types.
+    """
+    if not flags:
+        return None
+    return {"flags": [{"code": flag.code, "detail": flag.detail} for flag in flags]}
+
+
 def _same_submission(
     report: ReportModel,
     existing_voice: ReportMediaModel | None,
+    existing_photo: ReportMediaModel | None,
     payload: ReportCreateRequest,
     receipt_hash: str,
     voice: StoredVoice | None,
+    photo: StoredPhoto | None,
 ) -> bool:
+    """Is this retry the same submission, or a different one reusing the key?
+
+    Every field a client can vary has to appear here. A field that is compared
+    nowhere makes the idempotency check answer "same submission" for two genuinely
+    different reports, and the second one is then silently dropped in favour of the
+    first -- so `service_code` and the photo hash are checked for the same reason
+    the coordinates are.
+    """
     return (
         report.receipt_hash == receipt_hash
         and report.original_text == payload.description
         and report.language_hint == payload.language_hint
         and report.locality_label == payload.locality_label
+        and report.service_code == payload.service_code
         and _optional_float(report.latitude) == payload.latitude
         and _optional_float(report.longitude) == payload.longitude
         and (existing_voice.content_hash if existing_voice else None)
         == (voice.content_hash if voice else None)
+        and (existing_photo.content_hash if existing_photo else None)
+        == (photo.content_hash if photo else None)
     )
 
 
@@ -464,6 +561,13 @@ def _record_from_model(
     interpretation: ReportInterpretationModel | None = None,
     voice: ReportMediaModel | None = None,
     findings: list[SafetyReviewModel] | None = None,
+    *,
+    # Keyword-only, and appended rather than inserted next to `voice` where it would
+    # read better. Several callers pass the first four positionally, so slotting a
+    # parameter in among them would rebind `findings` to a photo at every one of
+    # those call sites -- and both are optional model objects, so nothing would
+    # complain.
+    photo: ReportMediaModel | None = None,
 ) -> IntakeRecord:
     payload = interpretation.payload if interpretation is not None else {}
     return IntakeRecord(
@@ -499,6 +603,33 @@ def _record_from_model(
             str(payload.get("summary")) if payload.get("summary") is not None else None
         ),
         safety_signal_codes=tuple(finding.signal_code for finding in findings or []),
+        service_code=report.service_code,
         voice_object_key=voice.object_key if voice else None,
         voice_content_type=voice.content_type if voice else None,
+        photo_object_key=photo.object_key if photo else None,
+        photo_content_type=photo.content_type if photo else None,
+        photo_integrity_codes=_integrity_codes(photo),
+        photo_perceptual_hash=photo.perceptual_hash if photo else None,
     )
+
+
+def _integrity_codes(photo: ReportMediaModel | None) -> tuple[str, ...]:
+    """Read the flag codes back out of the JSONB column, tolerating anything odd.
+
+    Defensive because this column is the one piece of the record whose shape is not
+    enforced by the database. A row written by an older version, or by hand during an
+    incident, must not be able to break the officer board -- an unreadable flag set
+    is worth degrading to "no flags" for, and is not worth a 500.
+    """
+    if photo is None or not isinstance(photo.integrity_flags, dict):
+        return ()
+    flags = cast(object, photo.integrity_flags.get("flags"))
+    if not isinstance(flags, list):
+        return ()
+    codes: list[str] = []
+    for entry in cast(list[object], flags):
+        if isinstance(entry, dict):
+            code = cast(object, cast(dict[str, object], entry).get("code"))
+            if code is not None:
+                codes.append(str(code))
+    return tuple(codes)

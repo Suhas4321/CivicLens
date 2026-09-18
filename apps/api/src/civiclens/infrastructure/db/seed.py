@@ -377,6 +377,9 @@ def seed_database(session: Session, root: Path | None = None) -> SeedResult:
     report_ids = _insert_reports(session, reports)
     incident_ids = _insert_incidents(session, truth, report_ids)
     need_count = _insert_needs(session, truth, incident_ids)
+    # Ordered by `DependencyOrderedSession`, not by the order of the calls above: a
+    # plain flush hands these tables to PostgreSQL alphabetically and breaks on a
+    # foreign key. See `infrastructure/db/session.py` for why that is.
     session.flush()
     return SeedResult(True, len(reports), len(incident_ids), need_count, public_count)
 
