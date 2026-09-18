@@ -6,6 +6,10 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+# Imported rather than restated, so the contract the web client generates from
+# `openapi.json` cannot drift from the values the grouping code actually produces.
+from civiclens.modules.relationships.grouping import ConfidenceBand, JoinReason
+
 
 class ApiModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -30,6 +34,11 @@ class LaneItem(ApiModel):
     # the text: when the two disagree the officer needs to see both, so neither
     # field may be derived from the other.
     service_code: str | None = None
+    # How sure the system is that the reports counted together are one problem, and
+    # ``None`` when there is only one report and therefore nothing being claimed. It
+    # sits next to `report_count` because the two are read together: "3 reports" is a
+    # different instruction depending on whether that 3 is established or proposed.
+    grouping_confidence: ConfidenceBand | None = None
 
 
 class OfficerOverview(ApiModel):
@@ -51,6 +60,34 @@ class IncidentSummary(ApiModel):
     report_count: int
     relationship_state: str
     classification: Literal["synthetic_demo"]
+
+
+class GroupingJoin(ApiModel):
+    """Why one report is counted inside a group, in the numbers that decided it.
+
+    An officer who thinks two complaints were wrongly merged is owed the distance,
+    the hours and the category match that merged them. A confidence band on its own
+    is not something anybody can argue with, and "the system grouped them" is the
+    answer that makes a person stop trusting the count instead of correcting it.
+
+    Every field is nullable because the evidence available depends on what the two
+    reports carried: a report located only by the name of a locality has no distance
+    to give, and the intent verdict is absent until a model reads the descriptions.
+    """
+
+    reason: JoinReason
+    same_category: bool | None = None
+    hours_apart: float | None = None
+    # Between this report and the first report in the group -- never between
+    # neighbours in a chain, because every member is compared against that lead.
+    distance_km: float | None = None
+    same_locality_label: bool | None = None
+    geometry_band: str | None = None
+    intent_verdict: str | None = None
+    # Differing bits out of 64 between the two attached photos. Content-derived, so
+    # it says "these two photographs look like the same subject" and nothing about
+    # where either was taken.
+    photo_hash_distance: int | None = None
 
 
 class ReportEvidence(ApiModel):
@@ -77,6 +114,10 @@ class ReportEvidence(ApiModel):
     # reconstruct an approximate ring around wherever the reporter was standing,
     # which is the thing the EXIF stripping exists to prevent.
     photo_integrity_flags: list[str] = Field(default_factory=list)
+    # Present on every report in a grouped item, including the first one, whose
+    # reason is ``lead``. ``None`` on the seeded incidents, where the links were
+    # authored rather than derived.
+    joined_by: GroupingJoin | None = None
 
 
 class IncidentDetail(ApiModel):

@@ -72,6 +72,13 @@ class IntakeRecord:
     # Coarse EXIF conclusions, already reduced to flag codes. The raw EXIF is never
     # on this record and must never be added to it; see `domain.photo_integrity`.
     photo_integrity_codes: tuple[str, ...] = ()
+    # The difference hash of the photo. On the record because grouping uses it to tell
+    # two reports of one flooded junction from two reports of different things at the
+    # same junction -- which is the question coordinates cannot answer. Derived from
+    # image content only: the EXIF, including where the photo was taken, was destroyed
+    # before these bytes existed. Never returned from an API; it is a grouping input,
+    # not something an officer or a reporter has any use for.
+    photo_perceptual_hash: str | None = None
 
 
 class IntakeRepository(Protocol):
@@ -160,6 +167,7 @@ class MemoryIntakeRepository:
                 photo_object_key=photo.object_key if photo else None,
                 photo_content_type=photo.content_type if photo else None,
                 photo_integrity_codes=tuple(flag.code for flag in photo_flags),
+                photo_perceptual_hash=photo.perceptual_hash if photo else None,
             )
             self._by_public_id[public_id] = record
             self._by_idempotency[idempotency_key] = record
@@ -601,6 +609,7 @@ def _record_from_model(
         photo_object_key=photo.object_key if photo else None,
         photo_content_type=photo.content_type if photo else None,
         photo_integrity_codes=_integrity_codes(photo),
+        photo_perceptual_hash=photo.perceptual_hash if photo else None,
     )
 
 

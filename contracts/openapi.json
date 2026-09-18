@@ -388,6 +388,104 @@
         "title": "EvidenceItem",
         "type": "object"
       },
+      "GroupingJoin": {
+        "additionalProperties": false,
+        "description": "Why one report is counted inside a group, in the numbers that decided it.\n\nAn officer who thinks two complaints were wrongly merged is owed the distance,\nthe hours and the category match that merged them. A confidence band on its own\nis not something anybody can argue with, and \"the system grouped them\" is the\nanswer that makes a person stop trusting the count instead of correcting it.\n\nEvery field is nullable because the evidence available depends on what the two\nreports carried: a report located only by the name of a locality has no distance\nto give, and the intent verdict is absent until a model reads the descriptions.",
+        "properties": {
+          "distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Km"
+          },
+          "geometry_band": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geometry Band"
+          },
+          "hours_apart": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hours Apart"
+          },
+          "intent_verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intent Verdict"
+          },
+          "photo_hash_distance": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Hash Distance"
+          },
+          "reason": {
+            "enum": [
+              "lead",
+              "photo_corroborated",
+              "intent_agreed",
+              "geometry_only"
+            ],
+            "title": "Reason",
+            "type": "string"
+          },
+          "same_category": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Same Category"
+          },
+          "same_locality_label": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Same Locality Label"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "GroupingJoin",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -668,6 +766,22 @@
           "explanation": {
             "title": "Explanation",
             "type": "string"
+          },
+          "grouping_confidence": {
+            "anyOf": [
+              {
+                "enum": [
+                  "high",
+                  "review",
+                  "not_eligible"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grouping Confidence"
           },
           "has_photo": {
             "default": false,
@@ -1258,6 +1372,16 @@
           "interpretation_summary": {
             "title": "Interpretation Summary",
             "type": "string"
+          },
+          "joined_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GroupingJoin"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "language": {
             "title": "Language",
