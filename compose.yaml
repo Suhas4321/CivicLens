@@ -1,6 +1,10 @@
 services:
   postgres:
-    image: postgres:17-alpine
+    # postgis/postgis rather than plain postgres: the spatial reference tables use
+    # geography columns and GiST indexes, so a server without PostGIS cannot run
+    # migration 20260915_0002 at all. This image enables the extension on first
+    # start, which is the Docker equivalent of infra/bootstrap-local-db.sh.
+    image: postgis/postgis:17-3.5
     environment:
       POSTGRES_DB: civiclens
       POSTGRES_USER: civiclens

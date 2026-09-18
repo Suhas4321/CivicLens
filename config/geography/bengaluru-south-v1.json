@@ -1,0 +1,190 @@
+{
+  "version": "bengaluru-south-v1",
+  "corporation": "Bengaluru South City Corporation",
+  "corporation_code": "BSCC",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "ODbL 1.0",
+  "notes": [
+    "The tag-to-category mapping below is policy, not code. Re-running the ingest with a corrected mapping requires no schema change and no code change.",
+    "Water bodies are deliberately absent. A lake is only useful as a waterlogging signal through its shoreline, and this schema stores POIs as centroids; the centroid of a 1 km lake would be a misleading proximity anchor. Add it as a polygon table when waterlogging context is actually scored.",
+    "verification_points carry approximate, hand-entered coordinates. The expected_* fields are null until they have been confirmed against a real ingest; the acceptance test asserts them only when they are non-null, and reports what it actually found when they are null."
+  ],
+  "source": {
+    "primary_url": "https://download.openstreetmap.fr/extracts/asia/india/karnataka.osm.pbf",
+    "primary_bytes_approx": 128200000,
+    "fallback_url": "https://download.geofabrik.de/asia/india/southern-zone-latest.osm.pbf",
+    "fallback_bytes_approx": 557400000,
+    "local_filename": "karnataka.osm.pbf",
+    "why_primary": "The openstreetmap.fr Karnataka extract is 4x smaller than Geofabrik's Southern Zone and already covers the whole state, so it is a faster download and a shorter ingest for identical coverage of the target bounding box."
+  },
+  "bbox": {
+    "min_lon": 77.5,
+    "min_lat": 12.85,
+    "max_lon": 77.65,
+    "max_lat": 12.98,
+    "covers": "JP Nagar, Banashankari, Jayanagar, Padmanabhanagar, BTM Layout and surrounds — the Bengaluru South wards this prototype scopes to."
+  },
+  "roads": {
+    "highway_values": [
+      "motorway",
+      "motorway_link",
+      "trunk",
+      "trunk_link",
+      "primary",
+      "primary_link",
+      "secondary",
+      "secondary_link",
+      "tertiary",
+      "tertiary_link",
+      "unclassified",
+      "residential",
+      "living_street",
+      "service",
+      "pedestrian",
+      "footway",
+      "road"
+    ],
+    "why_these": "Every value a citizen can stand on and complain about, including footway (broken footpath is a real BSCC complaint category). Excludes track, path, cycleway, steps, construction and proposed, which either are not municipal responsibilities or do not exist on the ground yet."
+  },
+  "localities": {
+    "place_values": [
+      "suburb",
+      "neighbourhood",
+      "quarter",
+      "village",
+      "town",
+      "city"
+    ],
+    "require_name": true
+  },
+  "poi_categories": [
+    {
+      "category": "hospital",
+      "priority": 100,
+      "tags": {
+        "amenity": [
+          "hospital"
+        ],
+        "healthcare": [
+          "hospital"
+        ]
+      }
+    },
+    {
+      "category": "clinic",
+      "priority": 90,
+      "tags": {
+        "amenity": [
+          "clinic",
+          "doctors"
+        ],
+        "healthcare": [
+          "clinic",
+          "doctor",
+          "centre"
+        ]
+      }
+    },
+    {
+      "category": "school",
+      "priority": 80,
+      "tags": {
+        "amenity": [
+          "school",
+          "kindergarten"
+        ]
+      }
+    },
+    {
+      "category": "college",
+      "priority": 70,
+      "tags": {
+        "amenity": [
+          "college",
+          "university"
+        ]
+      }
+    },
+    {
+      "category": "transit_station",
+      "priority": 60,
+      "tags": {
+        "railway": [
+          "station",
+          "halt"
+        ]
+      }
+    },
+    {
+      "category": "police",
+      "priority": 50,
+      "tags": {
+        "amenity": [
+          "police"
+        ]
+      }
+    },
+    {
+      "category": "fire_station",
+      "priority": 45,
+      "tags": {
+        "amenity": [
+          "fire_station"
+        ]
+      }
+    },
+    {
+      "category": "market",
+      "priority": 40,
+      "tags": {
+        "amenity": [
+          "marketplace"
+        ]
+      }
+    },
+    {
+      "category": "place_of_worship",
+      "priority": 30,
+      "tags": {
+        "amenity": [
+          "place_of_worship"
+        ]
+      }
+    },
+    {
+      "category": "bus_stop",
+      "priority": 20,
+      "tags": {
+        "highway": [
+          "bus_stop"
+        ]
+      }
+    }
+  ],
+  "verification_points": [
+    {
+      "label": "Jayanagar 4th Block, near Ashoka Pillar",
+      "lon": 77.582,
+      "lat": 12.9382,
+      "expected_locality_contains": null,
+      "expected_road_name_contains": null,
+      "observed": "2026-09-15 ingest: road='7th Main Road' (16.0 m), locality='Jayanagar 2nd Block'. Locality unasserted: the point is in 4th Block, so nearest-centroid landed on an adjacent block. Road unasserted: '7th Main Road' is generic across Bengaluru."
+    },
+    {
+      "label": "Banashankari, near the temple and bus stand",
+      "lon": 77.547,
+      "lat": 12.925,
+      "expected_locality_contains": null,
+      "expected_road_name_contains": null,
+      "observed": "2026-09-15 ingest: nearest road is unnamed in OSM (14.3 m), locality='Ittamadu'. Both unasserted: Ittamadu is a real adjacent locality, not Banashankari."
+    },
+    {
+      "label": "JP Nagar, near Sarakki junction on Kanakapura Road",
+      "lon": 77.5776,
+      "lat": 12.908,
+      "expected_locality_contains": "Sarakki",
+      "expected_road_name_contains": null,
+      "observed": "2026-09-15 ingest: road='11th Cross Road' (4.4 m), locality='Sarakki' - correct, so locality is asserted. Road unasserted: '11th Cross Road' is generic."
+    }
+  ]
+}
