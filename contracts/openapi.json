@@ -669,6 +669,11 @@
             "title": "Explanation",
             "type": "string"
           },
+          "has_photo": {
+            "default": false,
+            "title": "Has Photo",
+            "type": "boolean"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -682,6 +687,17 @@
             "minimum": 0.0,
             "title": "Report Count",
             "type": "integer"
+          },
+          "service_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Code"
           },
           "status": {
             "title": "Status",
@@ -1224,6 +1240,11 @@
             "title": "Classification",
             "type": "string"
           },
+          "has_photo": {
+            "default": false,
+            "title": "Has Photo",
+            "type": "boolean"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -1250,9 +1271,27 @@
             "title": "Original Text",
             "type": "string"
           },
+          "photo_integrity_flags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Photo Integrity Flags",
+            "type": "array"
+          },
           "public_id": {
             "title": "Public Id",
             "type": "string"
+          },
+          "service_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Code"
           }
         },
         "required": [
@@ -1854,6 +1893,53 @@
           }
         },
         "summary": "Overview",
+        "tags": [
+          "officer-demo"
+        ]
+      }
+    },
+    "/api/v1/officer/reports/{report_id}/photo": {
+      "get": {
+        "description": "Serve the sanitised photo attached to a fresh report.\n\nThe photo exists for one reason: so an officer can judge severity without\ndriving to the street. Nothing here interprets the image -- no vision model, no\nscoring. It is handed over for a person to look at.\n\n**Gated on demo mode, because nothing on ``/officer`` is authenticated yet.**\nEvery other officer route returns synthetic seed data, so an open door costs\nnothing; this one returns photographs that real people took and uploaded. Until\nthere is a login, a deployment with ``DEMO_MODE_ENABLED=false`` -- which is the\nonly way this service is meant to hold anything other than synthetic data --\nserves no photos at all. That makes the unsafe configuration impossible rather\nthan merely discouraged in a document, and it fails closed: someone wiring up\nreal intake has to add authentication before photos work, instead of\ndiscovering later that they had been public the whole time.",
+        "operationId": "report_photo_api_v1_officer_reports__report_id__photo_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {},
+              "image/png": {}
+            },
+            "description": "The stored photo"
+          },
+          "403": {
+            "description": "This deployment does not serve citizen photos"
+          },
+          "404": {
+            "description": "No such fresh report, or no photo on it"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report Photo",
         "tags": [
           "officer-demo"
         ]

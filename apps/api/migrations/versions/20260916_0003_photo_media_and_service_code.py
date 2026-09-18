@@ -146,12 +146,8 @@ def downgrade() -> None:
     # rows have always carried a duration.
     op.alter_column(_MEDIA_TABLE, "duration_seconds", nullable=False)
     _add_check_if_absent(bind, _MEDIA_TABLE, "voice_only", "media_type = 'voice'")
-    _add_check_if_absent(
-        bind, _MEDIA_TABLE, "byte_size_limit", "byte_size BETWEEN 1 AND 6291456"
-    )
-    _add_check_if_absent(
-        bind, _MEDIA_TABLE, "duration_limit", "duration_seconds BETWEEN 0 AND 30"
-    )
+    _add_check_if_absent(bind, _MEDIA_TABLE, "byte_size_limit", "byte_size BETWEEN 1 AND 6291456")
+    _add_check_if_absent(bind, _MEDIA_TABLE, "duration_limit", "duration_seconds BETWEEN 0 AND 30")
 
 
 def _has_column(bind: Connection, table: str, column: str) -> bool:

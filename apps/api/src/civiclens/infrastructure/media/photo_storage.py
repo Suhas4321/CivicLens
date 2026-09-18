@@ -21,11 +21,13 @@ from functools import lru_cache
 from threading import Lock
 from typing import Protocol
 
+from google.api_core.exceptions import NotFound as GcsNotFound
 from google.api_core.exceptions import PreconditionFailed
 from google.cloud import storage  # pyright: ignore[reportMissingTypeStubs]
 
 from civiclens.bootstrap.settings import get_settings
 from civiclens.modules.intake.photo import ValidatedPhoto
+from civiclens.shared.errors import NotFoundError
 
 _EXTENSIONS = {"image/jpeg": "jpg", "image/png": "png"}
 
@@ -47,7 +49,18 @@ class PhotoStorage(Protocol):
         self, photo: ValidatedPhoto, *, idempotency_key: str, retain_until: datetime
     ) -> StoredPhoto: ...
 
-    def get(self, object_key: str) -> bytes: ...
+    def get(self, object_key: str) -> bytes:
+        """Return the stored bytes, or raise ``NotFoundError`` if the key is absent.
+
+        The miss is part of the contract because it is a normal outcome, not a
+        fault: the database row and the object live in different places, and the
+        row outlives the object whenever the process restarts on the memory
+        backend or retention deletes the file on the bucket. A Protocol that left
+        this unsaid would make each backend's native exception -- ``KeyError``
+        here, ``google.api_core`` there -- leak to every caller, and the caller
+        would have to know which backend it was talking to in order to catch it.
+        """
+        ...
 
 
 class MemoryPhotoStorage:
@@ -68,7 +81,13 @@ class MemoryPhotoStorage:
         return _metadata(object_key, photo, retain_until)
 
     def get(self, object_key: str) -> bytes:
-        return self._objects[object_key]
+        try:
+            return self._objects[object_key]
+        except KeyError as exc:
+            # Expected after any restart: the report row survives in Postgres and
+            # the dict does not. An officer should be told the photo is gone, not
+            # shown a 500 that reads as a broken service.
+            raise NotFoundError("Photo object not found") from exc
 
 
 class GcsPhotoStorage:
@@ -96,9 +115,14 @@ class GcsPhotoStorage:
 
     def get(self, object_key: str) -> bytes:
         blob = self._bucket.blob(object_key)  # pyright: ignore[reportUnknownMemberType]
-        return blob.download_as_bytes(  # pyright: ignore[reportUnknownMemberType]
-            timeout=30
-        )
+        try:
+            return blob.download_as_bytes(  # pyright: ignore[reportUnknownMemberType]
+                timeout=30
+            )
+        except GcsNotFound as exc:
+            # Retention deletes these objects on schedule while the report row is
+            # kept, so a miss here is the designed end state of a photo's life.
+            raise NotFoundError("Photo object not found") from exc
 
 
 def _object_key(idempotency_key: str, photo: ValidatedPhoto) -> str:

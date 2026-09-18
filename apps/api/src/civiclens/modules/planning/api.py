@@ -3,8 +3,10 @@ from __future__ import annotations
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
+from civiclens.bootstrap.settings import get_settings
+from civiclens.infrastructure.media.photo_storage import get_photo_storage
 from civiclens.modules.intake.repository import IntakeRecord, IntakeRepository
 from civiclens.modules.intake.service import get_intake_repository
 from civiclens.modules.planning.read_service import (
@@ -69,6 +71,76 @@ async def incident_detail(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.code) from exc
 
 
+@router.get(
+    "/reports/{report_id}/photo",
+    response_class=Response,
+    responses={
+        200: {"content": {"image/jpeg": {}, "image/png": {}}, "description": "The stored photo"},
+        403: {"description": "This deployment does not serve citizen photos"},
+        404: {"description": "No such fresh report, or no photo on it"},
+    },
+)
+async def report_photo(report_id: UUID, repository: FreshRepository) -> Response:
+    """Serve the sanitised photo attached to a fresh report.
+
+    The photo exists for one reason: so an officer can judge severity without
+    driving to the street. Nothing here interprets the image -- no vision model, no
+    scoring. It is handed over for a person to look at.
+
+    **Gated on demo mode, because nothing on ``/officer`` is authenticated yet.**
+    Every other officer route returns synthetic seed data, so an open door costs
+    nothing; this one returns photographs that real people took and uploaded. Until
+    there is a login, a deployment with ``DEMO_MODE_ENABLED=false`` -- which is the
+    only way this service is meant to hold anything other than synthetic data --
+    serves no photos at all. That makes the unsafe configuration impossible rather
+    than merely discouraged in a document, and it fails closed: someone wiring up
+    real intake has to add authentication before photos work, instead of
+    discovering later that they had been public the whole time.
+    """
+    if not get_settings().demo_mode_enabled:
+        # Refused before the lookup, so that a disabled deployment cannot be used to
+        # test whether a given report id exists. 403 rather than 404 because the
+        # request was understood and no credential the caller could supply would
+        # change the answer -- there is no credential to supply.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="PHOTO_ACCESS_NOT_CONFIGURED"
+        )
+
+    try:
+        report = repository.get_by_id(report_id)
+    except NotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.code) from exc
+
+    if report.photo_object_key is None or report.photo_content_type is None:
+        # Both checked, though the writer sets them together. Reading one and
+        # trusting the other would turn a half-written row into a 500 here, and the
+        # content type is what stops these bytes being sniffed as something else.
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PHOTO_NOT_ATTACHED")
+
+    try:
+        data = get_photo_storage().get(report.photo_object_key)
+    except NotFoundError as exc:
+        # The row can outlive the object: retention deletes photos on schedule, and
+        # the memory backend loses them on restart. Neither is a fault.
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="PHOTO_EXPIRED") from exc
+
+    return Response(
+        content=data,
+        media_type=report.photo_content_type,
+        headers={
+            # Citizen evidence, so it is not left behind in the disk cache of a
+            # shared machine in a ward office, or in any proxy between here and it.
+            "Cache-Control": "no-store",
+            # These bytes came from the public. They are re-encoded from decoded
+            # pixels and can only be JPEG or PNG, but a browser that sniffs its own
+            # answer could still decide otherwise, and pixel data can be made to
+            # contain anything.
+            "X-Content-Type-Options": "nosniff",
+            "Content-Disposition": "inline",
+        },
+    )
+
+
 def _fresh_lane_item(report: IntakeRecord) -> LaneItem:
     category = report.interpretation_category or "unknown"
     safety = bool(report.safety_signal_codes)
@@ -95,6 +167,8 @@ def _fresh_lane_item(report: IntakeRecord) -> LaneItem:
             if safety
             else "One fresh report cannot establish a recurring need; an officer must review it."
         ),
+        has_photo=report.photo_object_key is not None,
+        service_code=report.service_code,
     )
 
 
@@ -134,6 +208,11 @@ def _fresh_incident_detail(report: IntakeRecord) -> IncidentDetail:
                 ),
                 classification="synthetic_demo",
                 interpretation_classification="ai_derived",
+                service_code=report.service_code,
+                has_photo=report.photo_object_key is not None,
+                # Already reduced to codes on the record. The raw EXIF never reached
+                # it, so there is nothing here to accidentally forward.
+                photo_integrity_flags=list(report.photo_integrity_codes),
             )
         ],
         relationship_explanation={

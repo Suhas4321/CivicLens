@@ -20,6 +20,16 @@ class LaneItem(ApiModel):
     report_count: int = Field(ge=0)
     classification: Literal["synthetic_demo", "ai_derived"]
     explanation: str
+    # On the lane item and not only in the detail view, because it changes what an
+    # officer does next. "There is a photo" means this one can be judged from a
+    # desk; the rest need a phone call or a visit, and that is the difference
+    # between a morning that clears twenty items and one that clears four.
+    has_photo: bool = False
+    # The category the reporter chose, which is what routes the item to BWSSB,
+    # BESCOM, BBMP or BMTC. Distinct from `category`, which is the AI's reading of
+    # the text: when the two disagree the officer needs to see both, so neither
+    # field may be derived from the other.
+    service_code: str | None = None
 
 
 class OfficerOverview(ApiModel):
@@ -53,6 +63,20 @@ class ReportEvidence(ApiModel):
     interpretation_summary: str
     classification: Literal["synthetic_demo"]
     interpretation_classification: Literal["ai_derived"]
+    service_code: str | None = None
+    # Whether to offer the image, and nothing about the image itself. The bytes are
+    # fetched from `GET /api/v1/officer/reports/{id}/photo`, a path the client
+    # builds from this id. Deliberately not an absolute URL in the payload: behind a
+    # proxy the host this process thinks it is serving is frequently not the host the
+    # officer's browser reached, and a wrong absolute URL fails silently as a broken
+    # image where a relative path cannot.
+    has_photo: bool = False
+    # Codes only -- never the flag details. The stored detail strings carry a
+    # rounded distance ("EXIF location is 500 m from the confirmed pin"), and an
+    # officer is told "near" or "far" and no more. Publishing the metres would
+    # reconstruct an approximate ring around wherever the reporter was standing,
+    # which is the thing the EXIF stripping exists to prevent.
+    photo_integrity_flags: list[str] = Field(default_factory=list)
 
 
 class IncidentDetail(ApiModel):
