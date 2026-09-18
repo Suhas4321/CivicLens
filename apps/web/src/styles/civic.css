@@ -1,0 +1,160 @@
+/* CivicLens design tokens.
+ *
+ * Layered on top of the shadcn/Tailwind-v4 baseline in global.css rather than
+ * replacing it, so the primitive components keep working and everything specific
+ * to this product is reviewable in one file.
+ *
+ * Three rules are encoded here rather than left to each page:
+ *
+ *   1. One page container width. Header, content and footer share an edge on
+ *      every route. Mismatched containers were what made the app look
+ *      half-finished.
+ *   2. Lane colour is reserved. Red means Lane 1 safety, amber means Lane 2
+ *      statutory overdue, teal means Lane 3 discretionary — and none of the
+ *      three is ever used decoratively.
+ *   3. The public and officer surfaces have different type scales, because a
+ *      citizen on a phone in daylight and an officer reading a ranked table
+ *      have opposite needs.
+ */
+
+@theme inline {
+  /* ---- Page container -------------------------------------------------- */
+  /* Used by .page-shell. Do not hand-write max-w-* on a page wrapper. */
+  --spacing-page: 1440px;
+
+  /* The Kannada font fallback lives in global.css beside the Geist declaration,
+   * because that `@theme inline` block is imported after this file and would win
+   * over an override placed here. */
+
+  /* ---- Lane identity --------------------------------------------------- */
+  /* REBUILD_04 §3. Each lane gets an accent (the 4px rail and icon), a surface
+   * (section background) and a border. The accents are far enough apart in hue
+   * to stay distinguishable under the common red-green deficiencies, and each
+   * lane also carries an icon and a text label, so colour is never the only
+   * carrier of meaning. */
+  --color-lane-safety: oklch(0.55 0.205 25);
+  --color-lane-safety-surface: oklch(0.968 0.022 25);
+  --color-lane-safety-border: oklch(0.885 0.055 25);
+  --color-lane-safety-ink: oklch(0.44 0.16 25);
+
+  --color-lane-statutory: oklch(0.7 0.15 68);
+  --color-lane-statutory-surface: oklch(0.973 0.032 82);
+  --color-lane-statutory-border: oklch(0.885 0.07 80);
+  --color-lane-statutory-ink: oklch(0.47 0.11 62);
+
+  --color-lane-discretionary: oklch(0.47 0.095 183);
+  --color-lane-discretionary-surface: oklch(0.968 0.018 185);
+  --color-lane-discretionary-border: oklch(0.885 0.04 185);
+  --color-lane-discretionary-ink: oklch(0.36 0.075 183);
+
+  /* ---- Officer chrome -------------------------------------------------- */
+  --color-officer-chrome: oklch(0.21 0.045 190);
+  --color-officer-chrome-2: oklch(0.26 0.05 190);
+  --color-officer-canvas: oklch(0.972 0.005 210);
+
+  /* ---- Public surface -------------------------------------------------- */
+  --color-public-canvas: oklch(0.982 0.006 95);
+
+  /* ---- Provenance ------------------------------------------------------ */
+  /* REBUILD_05: every displayed value carries where it came from. Deliberately
+   * low-chroma so a provenance chip never competes with a lane accent. */
+  --color-prov-real: oklch(0.52 0.055 235);
+  --color-prov-derived: oklch(0.54 0.06 285);
+  --color-prov-ai: oklch(0.55 0.065 320);
+  --color-prov-user: oklch(0.5 0.03 210);
+  --color-prov-synthetic: oklch(0.56 0.02 250);
+}
+
+@layer base {
+  /* Surfaces are selected by data-surface on the shell, so a page never has to
+   * know which one it is in, and a component dropped into either behaves. */
+  [data-surface="public"] {
+    font-size: 1.125rem; /* 18px: the smallest comfortable body size on a cheap
+                          * Android held at arm's length outdoors. */
+    line-height: 1.6;
+    background-color: var(--color-public-canvas);
+  }
+
+  [data-surface="officer"] {
+    font-size: 0.875rem; /* 14px: an officer is scanning a dense ranked table. */
+    line-height: 1.5;
+    background-color: var(--color-officer-canvas);
+  }
+
+  /* Every interactive control on the public surface clears the 48px minimum for
+   * a thumb, enforced here so no individual page can forget it. */
+  [data-surface="public"] :is(button, a[role="button"], [type="submit"], select) {
+    min-height: 3rem;
+  }
+
+  /* A visible focus ring that survives on both surfaces. Keyboard and switch
+   * users are the ones who need this and they are the least likely to be
+   * tested for. */
+  :focus-visible {
+    outline: 2px solid var(--color-lane-discretionary);
+    outline-offset: 2px;
+  }
+}
+
+@utility page-shell {
+  /* The single container. One definition means the header, the content and the
+   * footer cannot drift apart. */
+  margin-inline: auto;
+  width: 100%;
+  max-width: var(--spacing-page);
+  padding-inline: 1rem;
+
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+@utility numeric {
+  /* Scores, counts, days-overdue and rupee figures. Tabular figures keep digits
+   * in a column so a ranked list can be read down rather than across, and
+   * lining figures stop a zero reading as a lowercase o. */
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+@utility lane-rail {
+  /* The 4px vertical rail that identifies a lane down the left of a row. */
+  position: relative;
+  padding-inline-start: 1rem;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 4px;
+    border-radius: 9999px;
+    background-color: currentColor;
+  }
+}
+
+/* Score band styling deliberately does NOT reuse lane colour.
+ *
+ * A High-band discretionary score rendered in red would read as a safety
+ * hazard, which is exactly the confusion the three-lane split exists to
+ * prevent. Bands are therefore an ink-weight scale — filled, half, hollow —
+ * always accompanied by the number and the word. */
+@utility band-high {
+  background-color: oklch(0.24 0.03 210);
+  color: oklch(0.98 0.003 210);
+}
+
+@utility band-moderate {
+  background-color: oklch(0.9 0.012 210);
+  color: oklch(0.28 0.03 210);
+}
+
+@utility band-lower {
+  background-color: transparent;
+  color: oklch(0.45 0.02 215);
+  box-shadow: inset 0 0 0 1px oklch(0.85 0.012 210);
+}
